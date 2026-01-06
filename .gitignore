@@ -233,3 +233,9 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# Claude Code
+.claude/
+
+# Backend env
+backend/.env

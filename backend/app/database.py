@@ -2,8 +2,6 @@ from supabase import create_client, Client
 from typing import Optional
 from .config import get_settings
 
-settings = get_settings()
-
 _supabase_client: Optional[Client] = None
 
 
@@ -11,6 +9,7 @@ def get_supabase() -> Client:
     global _supabase_client
 
     if _supabase_client is None:
+        settings = get_settings()
         if not settings.supabase_url or not settings.supabase_key:
             raise ValueError("Supabase URL and Key must be set in environment variables")
 

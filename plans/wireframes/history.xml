@@ -1,0 +1,49 @@
+<page path="/history">
+    <header>
+        <left>
+            <logo href="/">YouTube Analyzer</logo>
+        </left>
+        <right>
+            <link href="/history" active>히스토리</link>
+        </right>
+    </header>
+
+    <main>
+        <title>분석 히스토리</title>
+
+        <search>
+            <input type="text" placeholder="검색..." />
+        </search>
+
+        <table>
+            <thead>
+                <th>썸네일</th>
+                <th>영상 제목</th>
+                <th>채널</th>
+                <th>분석 일시</th>
+                <th>액션</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><thumbnail src="{썸네일}"/></td>
+                    <td><link href="/result/{id}">{제목}</link></td>
+                    <td>{채널명}</td>
+                    <td>{날짜}</td>
+                    <td>
+                        <button onclick="delete({id})">삭제</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <pagination>
+            <prev>이전</prev>
+            <numbers>1 2 3 4 5</numbers>
+            <next>다음</next>
+        </pagination>
+    </main>
+
+    <footer>
+        <text>© 2025 YouTube Analyzer</text>
+    </footer>
+</page>

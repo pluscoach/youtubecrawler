@@ -1,0 +1,48 @@
+<page path="/">
+    <header>
+        <left>
+            <logo href="/">YouTube Analyzer</logo>
+        </left>
+        <right>
+            <link href="/history">히스토리</link>
+        </right>
+    </header>
+
+    <main>
+        <hero>
+            <title>유튜브 영상 소재 분석기</title>
+            <description>URL만 입력하면 AI가 콘텐츠 소재를 정리해드립니다</description>
+        </hero>
+
+        <form action="/api/analyze" method="POST">
+            <input
+                type="text"
+                name="url"
+                placeholder="https://youtube.com/watch?v=..."
+                required
+            />
+            <button type="submit">분석하기</button>
+        </form>
+
+        <loading id="loading" style="display:none">
+            <spinner/>
+            <text>영상을 분석하고 있습니다...</text>
+        </loading>
+
+        <recent>
+            <title>최근 분석</title>
+            <grid>
+                <card href="/result/{id}">
+                    <thumbnail src="{썸네일}"/>
+                    <title>{영상 제목}</title>
+                    <channel>{채널명}</channel>
+                    <date>{분석 일시}</date>
+                </card>
+            </grid>
+        </recent>
+    </main>
+
+    <footer>
+        <text>© 2025 YouTube Analyzer</text>
+    </footer>
+</page>

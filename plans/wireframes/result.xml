@@ -1,0 +1,118 @@
+<page path="/result/{id}">
+    <header>
+        <left>
+            <logo href="/">YouTube Analyzer</logo>
+        </left>
+        <right>
+            <link href="/history">히스토리</link>
+        </right>
+    </header>
+
+    <main>
+        <video-card>
+            <thumbnail src="{썸네일}"/>
+            <info>
+                <title>{영상 제목}</title>
+                <channel>{채널명}</channel>
+                <link href="{원본 URL}" target="_blank">원본 보기 →</link>
+            </info>
+        </video-card>
+
+        <analysis>
+            <section id="summary">
+                <header>
+                    <icon>📌</icon>
+                    <title>영상 요약</title>
+                </header>
+                <content>{요약 내용}</content>
+            </section>
+
+            <section id="key-message">
+                <header>
+                    <icon>💡</icon>
+                    <title>핵심 메시지</title>
+                </header>
+                <content>{핵심 메시지}</content>
+            </section>
+
+            <section id="key-points">
+                <header>
+                    <icon>🎯</icon>
+                    <title>키포인트</title>
+                </header>
+                <list>
+                    <item>1. {키포인트1}</item>
+                    <item>2. {키포인트2}</item>
+                    <item>3. {키포인트3}</item>
+                </list>
+            </section>
+
+            <section id="quotes">
+                <header>
+                    <icon>🗣️</icon>
+                    <title>인용할 대사</title>
+                </header>
+                <quote>"{인용 대사}"</quote>
+            </section>
+
+            <section id="people">
+                <header>
+                    <icon>👤</icon>
+                    <title>등장 인물</title>
+                </header>
+                <list>
+                    <item>
+                        <name>{이름}</name>
+                        <links>
+                            <link href="{관련 링크}">인터뷰 보기</link>
+                        </links>
+                    </item>
+                </list>
+            </section>
+
+            <section id="content-ideas">
+                <header>
+                    <icon>🔥</icon>
+                    <title>콘텐츠 추천</title>
+                </header>
+
+                <target-group name="뇌동매매 타겟">
+                    <title-example>{제목 예시}</title-example>
+                    <direction>{활용 방향}</direction>
+                </target-group>
+
+                <target-group name="원칙 투자 타겟">
+                    <title-example>{제목 예시}</title-example>
+                    <direction>{활용 방향}</direction>
+                </target-group>
+
+                <target-group name="경제적 자유 타겟">
+                    <title-example>{제목 예시}</title-example>
+                    <direction>{활용 방향}</direction>
+                </target-group>
+            </section>
+
+            <section id="script">
+                <header>
+                    <icon>🎬</icon>
+                    <title>대본 방향</title>
+                </header>
+                <steps>
+                    <step name="도입">{도입 내용}</step>
+                    <step name="전개">{전개 내용}</step>
+                    <step name="전환">{전환 내용}</step>
+                    <step name="마무리">{마무리 내용}</step>
+                </steps>
+            </section>
+        </analysis>
+
+        <actions>
+            <button href="/">새 분석하기</button>
+            <button href="/history">히스토리</button>
+        </actions>
+    </main>
+
+    <footer>
+        <text>© 2025 YouTube Analyzer</text>
+    </footer>
+</page>

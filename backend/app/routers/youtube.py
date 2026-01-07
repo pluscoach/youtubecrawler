@@ -7,7 +7,7 @@ from ..models.schemas import (
 )
 from ..services.transcript import extract_video_id, get_transcript
 from ..services.youtube_api import get_video_info
-from ..services.claude import analyze_transcript, analyze_critical_v2
+from ..services.claude import analyze_transcript, analyze_critical_v2, verify_sources, verify_critical_sources, verify_additional_sources
 from ..services.perspectives import get_all_perspectives, get_perspective
 from ..services.additional_analysis import analyze_additional
 from ..services.cache import get_cached_analysis, set_cached_analysis
@@ -138,8 +138,17 @@ async def analyze_video(request: AnalyzeRequest):
                 error=error
             )
 
+        # 4-1. 출처 검증 (Tavily API로 실제 URL 찾기)
+        analysis = await verify_sources(analysis)
+
         # 새 프롬프트 응답 구조 파싱
         video_analysis = analysis.get('video_analysis', {})
+
+        # 디버그: source_tracking 확인
+        st = video_analysis.get('source_tracking', [])
+        print(f"[DEBUG] source_tracking 개수: {len(st)}")
+        for i, s in enumerate(st):
+            print(f"[DEBUG] [{i}] title={s.get('source_title')}, url={s.get('source_url')}, verified={s.get('verified')}")
         suitability = normalize_suitability(analysis.get('suitability_analysis', {}))
 
         # quotes 변환 (새 구조: {text, speaker})
@@ -215,6 +224,112 @@ async def get_result(analysis_id: str):
                 success=False,
                 error="분석 결과를 찾을 수 없습니다."
             )
+
+        # 기존 데이터에 URL이 없으면 Tavily로 검증 후 업데이트
+        print(f"[GET] 분석 결과 조회: {analysis_id}", flush=True)
+        update_data = {}
+
+        # 1. source_tracking URL 검증
+        st = result.get('source_tracking', [])
+        if st:
+            st_needs_update = False
+            for s in st:
+                if isinstance(s, dict):
+                    url = s.get('source_url')
+                    if not url or (isinstance(url, str) and ('google.com/search' in url or url.lower() in ['null', 'none', ''])):
+                        st_needs_update = True
+                        break
+            if st_needs_update:
+                print(f"[GET] source_tracking URL 없음, Tavily로 검증 시작...")
+                updated_result = await verify_sources(result)
+                result['source_tracking'] = updated_result.get('source_tracking', [])
+                update_data['source_tracking'] = result['source_tracking']
+
+        # 2. critical_analysis URL 검증
+        ca = result.get('critical_analysis')
+        if ca:
+            ca_needs_update = False
+            # hidden_premises 중 하나라도 source_url이 없거나 Google URL이면 업데이트 필요
+            if 'hidden_premises' in ca:
+                for hp in ca['hidden_premises']:
+                    if isinstance(hp, dict):
+                        url = hp.get('source_url')
+                        if not url or (isinstance(url, str) and ('google.com/search' in url or url.lower() in ['null', 'none', ''])):
+                            ca_needs_update = True
+                            break
+
+            print(f"[GET] ca_needs_update: {ca_needs_update}", flush=True)
+            if ca_needs_update:
+                print(f"[GET] critical_analysis URL 없음, Tavily로 검증 시작...", flush=True)
+                updated_ca = await verify_critical_sources(ca)
+                result['critical_analysis'] = updated_ca
+                update_data['critical_analysis'] = updated_ca
+                print(f"[GET] Tavily 검증 완료", flush=True)
+
+        # 3. additional_analysis URL 검증 (interview_clips, evidence_sources, bonus_tip)
+        aa = result.get('additional_analysis')
+        if aa:
+            aa_needs_update = False
+
+            # 해외 인물 목록 (이 인물들은 영어로 검색해야 올바른 결과 나옴)
+            international_figures = ["워렌 버핏", "워런 버핏", "찰리 멍거", "일론 머스크", "제프 베조스",
+                                    "빌 게이츠", "스티브 잡스", "레이 달리오", "피터 린치", "조지 소로스"]
+
+            # video_sources 내 interview_clips 확인
+            video_sources = aa.get('video_sources', {})
+            if video_sources:
+                for clip in video_sources.get('interview_clips', []):
+                    if isinstance(clip, dict):
+                        link = clip.get('link')
+                        person = clip.get('person', '')
+
+                        # URL이 없거나 잘못된 형식인 경우
+                        if not link or (isinstance(link, str) and ('google.com/search' in link or link.lower() in ['null', 'none', '', '-'] or link.startswith('검색:'))):
+                            aa_needs_update = True
+                            break
+
+                        # 해외 인물인데 URL에 영어 이름이 없는 경우 (잘못된 한국어 콘텐츠일 가능성)
+                        if person in international_figures and isinstance(link, str):
+                            # 영어 이름 매핑
+                            eng_names = {"워렌 버핏": "buffett", "워런 버핏": "buffett", "찰리 멍거": "munger",
+                                        "일론 머스크": "musk", "제프 베조스": "bezos", "빌 게이츠": "gates",
+                                        "스티브 잡스": "jobs", "레이 달리오": "dalio", "피터 린치": "lynch",
+                                        "조지 소로스": "soros"}
+                            eng_name = eng_names.get(person, "")
+                            # URL에 영어 이름이 없으면 재검색 (잘못된 한국 콘텐츠일 가능성)
+                            if eng_name and eng_name not in link.lower():
+                                aa_needs_update = True
+                                print(f"[GET] 해외 인물 {person}의 URL이 영문명({eng_name}) 미포함, 재검색 필요", flush=True)
+                                break
+
+                if not aa_needs_update:
+                    for ev in video_sources.get('evidence_sources', []):
+                        if isinstance(ev, dict):
+                            link = ev.get('link')
+                            if not link or (isinstance(link, str) and ('google.com/search' in link or link.lower() in ['null', 'none', '', '-'] or link.startswith('검색:'))):
+                                aa_needs_update = True
+                                break
+
+            # bonus_tip 확인
+            if not aa_needs_update:
+                bonus_tip = aa.get('bonus_tip', {})
+                if isinstance(bonus_tip, dict):
+                    source_url = bonus_tip.get('source_url')
+                    if bonus_tip.get('source') and (not source_url or (isinstance(source_url, str) and ('google.com/search' in source_url or source_url.lower() in ['null', 'none', '', '-']))):
+                        aa_needs_update = True
+
+            print(f"[GET] aa_needs_update: {aa_needs_update}", flush=True)
+            if aa_needs_update:
+                print(f"[GET] additional_analysis URL 없음, Tavily로 검증 시작...", flush=True)
+                updated_aa = await verify_additional_sources(aa)
+                result['additional_analysis'] = updated_aa
+                update_data['additional_analysis'] = updated_aa
+                print(f"[GET] additional_analysis Tavily 검증 완료", flush=True)
+
+        # DB 업데이트 (변경사항이 있을 때만)
+        if update_data:
+            await update_analysis(analysis_id, update_data)
+            print(f"[GET] 기존 데이터 URL 업데이트 완료: {list(update_data.keys())}", flush=True)
 
         analysis_result = AnalysisResult(
             id=result.get('id'),
@@ -293,6 +408,18 @@ async def analyze_critical_endpoint(request: CriticalAnalyzeRequest):
                 error=error
             )
 
+        # 3-1. 비판적 분석 출처 검증 (Tavily API로 실제 URL 찾기)
+        critical_result = await verify_critical_sources(critical_result)
+
+        # DEBUG: 저장 직전 데이터 확인
+        print(f"[DEBUG] verify_critical_sources 후 critical_result keys: {critical_result.keys() if critical_result else 'None'}")
+        if critical_result and 'hidden_premises' in critical_result:
+            for i, hp in enumerate(critical_result['hidden_premises'][:2]):
+                print(f"[DEBUG] hidden_premises[{i}]: source_url={hp.get('source_url')}, verified={hp.get('verified')}")
+        if critical_result and 'realistic_contradictions' in critical_result:
+            for i, rc in enumerate(critical_result['realistic_contradictions'][:2]):
+                print(f"[DEBUG] realistic_contradictions[{i}]: source_url={rc.get('source_url')}, verified={rc.get('verified')}")
+
         # 분석 결과에 에러가 있는 경우 (부적합 등)
         if critical_result and critical_result.get('error'):
             return AnalyzeResponse(
@@ -305,6 +432,7 @@ async def analyze_critical_endpoint(request: CriticalAnalyzeRequest):
             "perspective": request.perspective,
             "critical_analysis": critical_result
         }
+        print(f"[DEBUG] Supabase에 저장할 critical_analysis 데이터 크기: {len(str(critical_result))} chars")
         updated = await update_analysis(request.analysis_id, update_data)
 
         if not updated:
@@ -312,6 +440,13 @@ async def analyze_critical_endpoint(request: CriticalAnalyzeRequest):
                 success=False,
                 error="분석 결과 업데이트에 실패했습니다."
             )
+
+        # DEBUG: Supabase에서 반환된 데이터 확인
+        print(f"[DEBUG] Supabase에서 반환된 critical_analysis keys: {updated.get('critical_analysis', {}).keys() if updated.get('critical_analysis') else 'None'}")
+        returned_ca = updated.get('critical_analysis', {})
+        if returned_ca and 'hidden_premises' in returned_ca:
+            for i, hp in enumerate(returned_ca['hidden_premises'][:2]):
+                print(f"[DEBUG] 반환된 hidden_premises[{i}]: source_url={hp.get('source_url')}, verified={hp.get('verified')}")
 
         # 5. 결과 반환
         analysis_result = AnalysisResult(

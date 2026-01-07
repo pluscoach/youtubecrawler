@@ -69,6 +69,12 @@ ANALYSIS_PROMPT_WITH_SUITABILITY = """너는 투자 유튜브 콘텐츠 기획�
             "level": "높음|중간|낮음",
             "reason": "원본 인터뷰, 책, 기사 등 신뢰도 있는 출처 활용 가능 여부"
         }},
+        "auto_trading_potential": {{
+            "level": "높음|중간|낮음|없음",
+            "implementable": ["구현 가능한 요소1", "구현 가능한 요소2"],
+            "not_implementable": ["구현 불가능한 요소1"],
+            "reason": "Claude와 코드 개발로 구현 가능한 부분과 불가능한 부분"
+        }},
         "suitability_score": 3,
         "judgment": "적합|보류|부적합",
         "usage_recommendation": "메인 콘텐츠|숏폼|참고만|패스",
@@ -91,6 +97,13 @@ ANALYSIS_PROMPT_WITH_SUITABILITY = """너는 투자 유튜브 콘텐츠 기획�
    - 책: 교보문고, Yes24, 알라딘, Google Books 링크
    - 보고서: 원본 PDF 또는 발행 기관 페이지
    - URL을 찾을 수 없으면: source_url은 null, source_type은 "출처 확인 필요", search_keywords에 검색 키워드 제안
+8. auto_trading_potential (자동매매 연결 가능성) 평가 기준 - Claude와 코드 개발로 구현 가능한가?:
+   - 높음: 기술적 지표(RSI, MACD 등), 규칙 기반 매매, 손절/익절 자동화, 알림 시스템
+   - 중간: 재무 데이터 분석(PER, PBR 필터링), 뉴스 감성 분석, 백테스팅
+   - 낮음: 복잡한 예측, 질적 분석 요소 포함
+   - 없음: 물리적 행동, 경영진 면담, 직관/경험 기반 판단
+   - implementable에는 실제 코드로 구현 가능한 요소만 작성
+   - not_implementable에는 코드로 구현 불가능한 요소 작성
 """
 
 
@@ -125,7 +138,7 @@ async def analyze_transcript(transcript: str) -> tuple[Optional[Dict], Optional[
 
         message = client.messages.create(
             model=MODEL_FAST,  # Haiku - 빠른 1단계 분석
-            max_tokens=8192,
+            max_tokens=4096,
             messages=[
                 {
                     "role": "user",
@@ -309,3 +322,207 @@ async def analyze_contradictions(
         return None, "API 요청 한도 초과: 잠시 후 다시 시도해주세요."
     except Exception as e:
         return None, f"모순 분석 중 오류 발생: {str(e)}"
+
+
+async def verify_sources(analysis_result: Dict) -> Dict:
+    """
+    Claude가 언급한 출처들을 Tavily로 검증하고 실제 URL 추가
+
+    Args:
+        analysis_result: Claude 분석 결과
+
+    Returns:
+        출처 링크가 추가된 분석 결과
+    """
+    from .tavily_search import search_source_by_type
+
+    print("[Tavily] verify_sources 호출됨")
+
+    # 1. 출처 추적 (source_tracking) 검증
+    if "video_analysis" in analysis_result and "source_tracking" in analysis_result["video_analysis"]:
+        sources = analysis_result["video_analysis"]["source_tracking"]
+        print(f"[Tavily] source_tracking 개수: {len(sources)}")
+
+        for i, source in enumerate(sources):
+            source_title = source.get("source_title", "")
+            source_type = source.get("source_type", "기타")
+            quote = source.get("quote", "")
+            existing_url = source.get("source_url")
+
+            print(f"[Tavily] [{i+1}] 출처: {source_title}, 유형: {source_type}, 기존URL: {existing_url}")
+
+            # URL이 없거나 null인 경우 검색
+            if source_title and (not existing_url or existing_url == "null" or existing_url is None):
+                print(f"[Tavily] [{i+1}] Tavily 검색 시작: {source_title}")
+                result = search_source_by_type(source_title, source_type, quote)
+                print(f"[Tavily] [{i+1}] 검색 결과: found={result.get('found')}, url={result.get('url')}")
+
+                source["source_url"] = result.get("url")
+                source["verified"] = result.get("found", False)
+                source["search_query"] = result.get("search_query", source_title)
+            else:
+                print(f"[Tavily] [{i+1}] 이미 URL 있음, 스킵")
+
+    # 2. 소재 적합성의 출처들은 별도 처리 불필요 (텍스트만 있음)
+
+    return analysis_result
+
+
+async def verify_critical_sources(critical_result: Dict) -> Dict:
+    """
+    비판적 분석 결과의 출처들을 Tavily로 검증하고 실제 URL 추가
+
+    Args:
+        critical_result: 비판적 분석 결과
+
+    Returns:
+        출처 링크가 추가된 분석 결과
+    """
+    from .tavily_search import search_source_by_type
+
+    print("[Tavily] verify_critical_sources 호출됨")
+
+    def needs_url_search(url_value):
+        """URL 검색이 필요한지 확인 (null, 빈값, 'null' 문자열 등)"""
+        if not url_value:
+            return True
+        if isinstance(url_value, str):
+            url_lower = url_value.lower().strip()
+            if url_lower in ['null', 'none', '', '-']:
+                return True
+            # Google 검색 URL도 재검색 대상
+            if 'google.com/search' in url_lower:
+                return True
+        return False
+
+    # 1. 숨겨진 전제 (hidden_premises) 출처 검증
+    if "hidden_premises" in critical_result:
+        print(f"[Tavily] hidden_premises 개수: {len(critical_result['hidden_premises'])}")
+        for i, premise in enumerate(critical_result["hidden_premises"]):
+            if isinstance(premise, dict) and premise.get("source"):
+                current_url = premise.get("source_url")
+                print(f"[Tavily] hidden_premise[{i}] 현재 source_url: {current_url}")
+                if needs_url_search(current_url):
+                    print(f"[Tavily] hidden_premise[{i}] 검색: {premise.get('source')}")
+                    result = search_source_by_type(premise["source"], "기타", premise.get("premise", ""))
+                    premise["source_url"] = result.get("url")
+                    premise["verified"] = result.get("found", False)
+                    print(f"[Tavily] hidden_premise[{i}] 결과: found={result.get('found')}, url={result.get('url')}")
+
+    # 2. 현실적 모순 (realistic_contradictions) 출처 검증
+    if "realistic_contradictions" in critical_result:
+        print(f"[Tavily] realistic_contradictions 개수: {len(critical_result['realistic_contradictions'])}")
+        for i, contradiction in enumerate(critical_result["realistic_contradictions"]):
+            if isinstance(contradiction, dict) and contradiction.get("source"):
+                current_url = contradiction.get("source_url")
+                print(f"[Tavily] contradiction[{i}] 현재 source_url: {current_url}")
+                if needs_url_search(current_url):
+                    print(f"[Tavily] contradiction[{i}] 검색: {contradiction.get('source')}")
+                    result = search_source_by_type(contradiction["source"], "기타", contradiction.get("strategy", ""))
+                    contradiction["source_url"] = result.get("url")
+                    contradiction["verified"] = result.get("found", False)
+                    print(f"[Tavily] contradiction[{i}] 결과: found={result.get('found')}, url={result.get('url')}")
+
+    # 3. 출처 기반 모순 분석 (source_based_contradictions) 출처 검증
+    if "source_based_contradictions" in critical_result:
+        print(f"[Tavily] source_based_contradictions 개수: {len(critical_result['source_based_contradictions'])}")
+        for i, item in enumerate(critical_result["source_based_contradictions"]):
+            if isinstance(item, dict):
+                # 원본 출처
+                if item.get("original_source") and needs_url_search(item.get("original_source_url")):
+                    print(f"[Tavily] sbc[{i}] original 검색: {item.get('original_source')}")
+                    result = search_source_by_type(item["original_source"], "기타", item.get("original_claim", ""))
+                    item["original_source_url"] = result.get("url")
+                    print(f"[Tavily] sbc[{i}] original 결과: {result.get('url')}")
+
+                # 반례 출처
+                if item.get("counterexample_source") and needs_url_search(item.get("counterexample_source_url")):
+                    print(f"[Tavily] sbc[{i}] counter 검색: {item.get('counterexample_source')}")
+                    result = search_source_by_type(item["counterexample_source"], "기타", item.get("counterexample", ""))
+                    item["counterexample_source_url"] = result.get("url")
+                    print(f"[Tavily] sbc[{i}] counter 결과: {result.get('url')}")
+
+                # 숨겨진 조건 출처
+                if item.get("hidden_condition_source") and needs_url_search(item.get("hidden_condition_source_url")):
+                    print(f"[Tavily] sbc[{i}] hidden 검색: {item.get('hidden_condition_source')}")
+                    result = search_source_by_type(item["hidden_condition_source"], "기타", item.get("hidden_condition", ""))
+                    item["hidden_condition_source_url"] = result.get("url")
+                    print(f"[Tavily] sbc[{i}] hidden 결과: {result.get('url')}")
+
+    print(f"[Tavily] verify_critical_sources 완료")
+    return critical_result
+
+
+async def verify_additional_sources(additional_result: Dict) -> Dict:
+    """
+    추가 분석 결과의 출처들을 Tavily로 검증하고 실제 URL 추가
+
+    Args:
+        additional_result: 추가 분석 결과
+
+    Returns:
+        출처 링크가 추가된 분석 결과
+    """
+    from .tavily_search import search_interview_clip, search_evidence_source, search_book_source
+
+    def needs_url_search(url_value):
+        """URL 검색이 필요한지 확인"""
+        if not url_value:
+            return True
+        if isinstance(url_value, str):
+            url_lower = url_value.lower().strip()
+            if url_lower in ['null', 'none', '', '-']:
+                return True
+            if url_lower.startswith('검색:'):
+                return True
+            if 'google.com/search' in url_lower:
+                return True
+        return False
+
+    print("[Tavily] verify_additional_sources 호출됨", flush=True)
+
+    # 1. video_sources.interview_clips 검증 (YouTube 우선)
+    video_sources = additional_result.get("video_sources", {})
+    if video_sources:
+        interview_clips = video_sources.get("interview_clips", [])
+        if interview_clips:
+            print(f"[Tavily] interview_clips 개수: {len(interview_clips)}", flush=True)
+            for i, clip in enumerate(interview_clips):
+                if isinstance(clip, dict) and needs_url_search(clip.get("link")):
+                    person = clip.get("person", "")
+                    video_title = clip.get("video_title", "")
+                    quote = clip.get("quote", "")
+                    print(f"[Tavily] interview_clip[{i}] 검색: {person} - {video_title}", flush=True)
+                    result = search_interview_clip(person, video_title, quote)
+                    clip["link"] = result.get("url")
+                    clip["verified"] = result.get("found", False)
+                    print(f"[Tavily] interview_clip[{i}] 결과: {result.get('url')}", flush=True)
+
+        # 2. video_sources.evidence_sources 검증
+        evidence_sources = video_sources.get("evidence_sources", [])
+        if evidence_sources:
+            print(f"[Tavily] evidence_sources 개수: {len(evidence_sources)}", flush=True)
+            for i, ev in enumerate(evidence_sources):
+                if isinstance(ev, dict) and needs_url_search(ev.get("link")):
+                    evidence = ev.get("evidence", "")
+                    source_type = ev.get("source_type", "")
+                    print(f"[Tavily] evidence[{i}] 검색: {evidence} ({source_type})", flush=True)
+                    result = search_evidence_source(evidence, source_type)
+                    ev["link"] = result.get("url")
+                    ev["verified"] = result.get("found", False)
+                    print(f"[Tavily] evidence[{i}] 결과: {result.get('url')}", flush=True)
+
+    # 3. bonus_tip.source_url 검증
+    bonus_tip = additional_result.get("bonus_tip", {})
+    if bonus_tip and isinstance(bonus_tip, dict):
+        if needs_url_search(bonus_tip.get("source_url")):
+            source = bonus_tip.get("source", "")
+            if source:
+                print(f"[Tavily] bonus_tip 검색: {source}", flush=True)
+                result = search_book_source(source)  # 교보문고 우선
+                bonus_tip["source_url"] = result.get("url")
+                bonus_tip["verified"] = result.get("found", False)
+                print(f"[Tavily] bonus_tip 결과: {result.get('url')}", flush=True)
+
+    print("[Tavily] verify_additional_sources 완료", flush=True)
+    return additional_result

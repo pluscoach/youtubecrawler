@@ -59,6 +59,7 @@ class HiddenPremise(BaseModel):
     why_problem: str = Field(..., description="왜 비현실적인지 데이터로 증명")
     source: str = Field(..., description="출처명")
     source_url: Optional[str] = Field(None, description="출처 URL")
+    verified: Optional[bool] = Field(None, description="Tavily로 검증 여부")
 
 
 # 현실적 모순 스키마 (새 구조)
@@ -68,6 +69,7 @@ class RealisticContradiction(BaseModel):
     evidence_data: str = Field(..., description="근거 데이터")
     source: str = Field(..., description="출처명")
     source_url: Optional[str] = Field(None, description="출처 URL")
+    verified: Optional[bool] = Field(None, description="Tavily로 검증 여부")
 
 
 # 출처 기반 모순 분석 스키마 (새 구조)

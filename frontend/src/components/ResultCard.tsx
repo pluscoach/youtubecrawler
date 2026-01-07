@@ -67,11 +67,29 @@ function StarRating({ score, max = 5 }: { score: number; max?: number }) {
   );
 }
 
-function SourceLink({ url, text }: { url?: string | null; text: string }) {
-  if (url && url.startsWith('http')) {
+function SourceLink({ url, text, verified }: { url?: string | null; text: string; verified?: boolean }) {
+  // URL이 있고 Google 검색이 아닌 실제 URL인 경우
+  if (url && url.startsWith('http') && !url.includes('google.com/search')) {
     return (
       <a href={url} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
-        {text}
+        {verified ? '✓ ' : '🔗 '}{text}
+      </a>
+    );
+  }
+  // URL이 Google 검색 URL이거나 없는 경우
+  const searchUrl = url?.includes('google.com/search')
+    ? url
+    : (text && text !== '-' ? `https://www.google.com/search?q=${encodeURIComponent(text)}` : null);
+
+  if (searchUrl) {
+    return (
+      <a
+        href={searchUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-yellow-400 hover:underline cursor-pointer"
+      >
+        🔍 {text}
       </a>
     );
   }
@@ -90,6 +108,7 @@ function SourceTrackingTable({ sources }: { sources: SourceTracking[] }) {
             <th className="text-left py-3 px-2 text-text-secondary font-medium">원본 출처</th>
             <th className="text-left py-3 px-2 text-text-secondary font-medium">유형</th>
             <th className="text-left py-3 px-2 text-text-secondary font-medium">링크</th>
+            <th className="text-left py-3 px-2 text-text-secondary font-medium">검증</th>
           </tr>
         </thead>
         <tbody>
@@ -111,13 +130,29 @@ function SourceTrackingTable({ sources }: { sources: SourceTracking[] }) {
                 </span>
               </td>
               <td className="py-3 px-2">
-                {source.source_url ? (
+                {source.source_url && source.source_url.startsWith('http') && !source.source_url.includes('google.com/search') ? (
                   <a href={source.source_url} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
-                    바로가기
+                    {source.verified ? '✓ 바로가기' : '🔗 바로가기'}
                   </a>
                 ) : (
-                  <span className="text-text-secondary text-xs">
-                    검색: {source.search_keywords?.join(', ') || '-'}
+                  <a
+                    href={`https://www.google.com/search?q=${encodeURIComponent(source.source_title || source.search_keywords?.join(' ') || '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-yellow-400 hover:underline cursor-pointer"
+                  >
+                    🔍 Google 검색
+                  </a>
+                )}
+              </td>
+              <td className="py-3 px-2">
+                {source.verified ? (
+                  <span className="text-green-400 text-xs flex items-center gap-1">
+                    <span>✓</span> 검증됨
+                  </span>
+                ) : (
+                  <span className="text-yellow-400 text-xs flex items-center gap-1">
+                    <span>🔍</span> 미검증
                   </span>
                 )}
               </td>
@@ -266,7 +301,7 @@ function HiddenPremisesTable({ premises }: { premises: (HiddenPremise | string |
                 <td className="py-3 px-2 text-text-primary">{item.premise || '-'}</td>
                 <td className="py-3 px-2 text-text-secondary">{item.why_problem || '-'}</td>
                 <td className="py-3 px-2">
-                  <SourceLink url={item.source_url} text={item.source || '-'} />
+                  <SourceLink url={item.source_url} text={item.source || '-'} verified={item.verified} />
                 </td>
               </tr>
             );
@@ -309,7 +344,7 @@ function RealisticContradictionsTable({ contradictions }: { contradictions: (Rea
                 <td className="py-3 px-2 text-text-secondary">{item.difficulty_reason || '-'}</td>
                 <td className="py-3 px-2 text-yellow-400">{item.evidence_data || '-'}</td>
                 <td className="py-3 px-2">
-                  <SourceLink url={item.source_url} text={item.source || '-'} />
+                  <SourceLink url={item.source_url} text={item.source || '-'} verified={item.verified} />
                 </td>
               </tr>
             );

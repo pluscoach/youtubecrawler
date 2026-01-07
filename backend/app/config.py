@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     # CORS
     frontend_url: str = "http://localhost:3000"
 
+    # Tavily (출처 검색용)
+    tavily_api_key: str = ""
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

@@ -43,6 +43,22 @@ async def get_analysis_by_id(analysis_id: str) -> Optional[dict]:
     return None
 
 
+async def get_analysis_by_video_id(video_id: str) -> Optional[dict]:
+    """video_id로 최신 분석 결과 조회 (캐시용)"""
+    supabase = get_supabase()
+
+    result = supabase.table("analyses")\
+        .select("*")\
+        .eq("video_id", video_id)\
+        .order("created_at", desc=True)\
+        .limit(1)\
+        .execute()
+
+    if result.data:
+        return result.data[0]
+    return None
+
+
 async def get_history(limit: int = 20, offset: int = 0) -> list:
     """분석 히스토리 조회"""
     supabase = get_supabase()
@@ -63,6 +79,17 @@ async def delete_analysis(analysis_id: str) -> bool:
     result = supabase.table("analyses").delete().eq("id", analysis_id).execute()
 
     return len(result.data) > 0 if result.data else False
+
+
+async def update_analysis(analysis_id: str, update_data: dict) -> Optional[dict]:
+    """분석 결과 업데이트"""
+    supabase = get_supabase()
+
+    result = supabase.table("analyses").update(update_data).eq("id", analysis_id).execute()
+
+    if result.data:
+        return result.data[0]
+    return None
 
 
 async def get_history_count() -> int:

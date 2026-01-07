@@ -63,9 +63,13 @@ export default function ResultPage() {
     return null;
   }
 
+  const handleResultUpdate = (updatedResult: AnalysisResult) => {
+    setResult(updatedResult);
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <ResultCard result={result} />
+      <ResultCard result={result} onUpdate={handleResultUpdate} />
 
       {/* Actions */}
       <div className="flex gap-4 justify-center mt-8">

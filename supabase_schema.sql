@@ -17,8 +17,19 @@ CREATE TABLE IF NOT EXISTS analyses (
     summary TEXT,
     key_message TEXT,
     key_points JSONB DEFAULT '[]'::jsonb,
-    quotes JSONB DEFAULT '[]'::jsonb,
+    quotes JSONB DEFAULT '[]'::jsonb,  -- {text, speaker} 구조
     people JSONB DEFAULT '[]'::jsonb,
+    investment_strategy TEXT,  -- 거장의 전략
+    -- 출처 추적 컬럼
+    source_tracking JSONB DEFAULT '[]'::jsonb,
+    -- 1단계: 소재 적합성 분석
+    suitability_analysis JSONB DEFAULT NULL,
+    -- 2단계: 비판적 분석 (버튼 클릭 시)
+    perspective TEXT DEFAULT NULL,
+    critical_analysis JSONB DEFAULT NULL,
+    -- 3단계: 추가 분석 (버튼 클릭 시)
+    additional_analysis JSONB DEFAULT NULL,
+    -- deprecated (기존 호환성)
     content_ideas JSONB DEFAULT '[]'::jsonb,
     script_direction JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

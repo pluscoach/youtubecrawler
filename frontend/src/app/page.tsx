@@ -46,7 +46,7 @@ export default function Home() {
           유튜브 영상 소재 분석기
         </h1>
         <p className="text-text-secondary text-lg">
-          URL만 입력하면 AI가 콘텐츠 소재를 정리해드립니다
+          URL만 입력하면 AI가 콘텐츠 소재를 분석해드립니다
         </p>
       </section>
 
@@ -58,7 +58,7 @@ export default function Home() {
       {/* Loading */}
       {isLoading && (
         <section className="my-12">
-          <Loading message="영상을 분석하고 있습니다... (30초~1분 소요)" />
+          <Loading message="소재 적합성 빠르게 확인 중... (10~20초)" />
         </section>
       )}
 

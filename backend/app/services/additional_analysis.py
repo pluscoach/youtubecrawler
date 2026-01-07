@@ -91,7 +91,7 @@ ADDITIONAL_ANALYSIS_PROMPT = """너는 투자 유튜브 콘텐츠 전문 기획�
         "video_title": "영상 제목",
         "quote": "발언 내용",
         "timestamp": "시간대 (예: 2:35~3:10)",
-        "link": "링크 또는 null"
+        "link": "실제 YouTube URL (예: https://www.youtube.com/watch?v=...) 또는 '검색: [검색어]'"
       }}
     ],
     "evidence_sources": [
@@ -99,7 +99,7 @@ ADDITIONAL_ANALYSIS_PROMPT = """너는 투자 유튜브 콘텐츠 전문 기획�
         "contradiction": "모순 내용",
         "evidence": "증거 자료",
         "source_type": "기사|논문|보고서|영상",
-        "link": "링크 또는 null"
+        "link": "실제 URL (한국거래소: https://data.krx.co.kr, 금융감독원: https://www.fss.or.kr 등) 또는 '검색: [검색어]'"
       }}
     ],
     "broll_keywords": [
@@ -153,18 +153,18 @@ ADDITIONAL_ANALYSIS_PROMPT = """너는 투자 유튜브 콘텐츠 전문 기획�
     "contexts": [
       {{
         "previous_line": "직전 대사",
-        "connection": "멤버십 연결 문구"
+        "connection": "멤버십 연결 문구 (자동화/시스템 관점)"
       }}
     ],
     "teasers": [
       {{
         "situation": "상황 (예: 자동매매 언급 후)",
-        "teaser": "티저 문구"
+        "teaser": "티저 문구 - 반드시 자동화/시스템 관점으로 작성"
       }}
     ],
     "content_suggestions": [
       {{
-        "topic": "멤버십 콘텐츠 주제",
+        "topic": "멤버십 콘텐츠 주제 (자동화 관점)",
         "connection": "이 영상과 연결점"
       }}
     ]
@@ -179,12 +179,26 @@ ADDITIONAL_ANALYSIS_PROMPT = """너는 투자 유튜브 콘텐츠 전문 기획�
 5. 멤버십은 공감 파트에서 자연스럽게만
 6. 꿀팁은 영상 자체 가치를 높이는 실용 정보
 7. 마무리는 광고/유도가 아닌 투자 철학으로 완결
-8. 영상 소스는 실제로 쓸 수 있는 링크 위주
+8. 영상 소스 링크 규칙:
+   - interview_clips: 실제 YouTube URL (https://www.youtube.com/watch?v=...) 필수, 못 찾으면 "검색: [검색어]"
+   - evidence_sources: 실제 기사/보고서 URL 필수, 한국거래소(data.krx.co.kr), 금융감독원(fss.or.kr) 등
+   - 링크 못 찾으면 반드시 "검색: [검색어]" 형식으로 표시
 9. 성과 예측은 근거 기반으로
 10. 모든 추천에는 근거 명시
 11. thumbnail_suggestions는 5개 (유형별 1개씩)
 12. title_suggestions는 5개 (패턴별 1개씩)
 13. script_directions는 7개 (파트별 1개씩)
+14. 멤버십 연결 포인트 필수 규칙:
+    - 절대 금지: "구체적인 투자 방법", "어떤 종목 사야 하는지", "수익률 보장"
+    - 반드시 사용: "자동화", "시스템", "감정 개입 없이", "원칙대로 실행"
+    - 티저 문구 예시:
+      * "이 전략을 자동으로 실행하는 방법, 멤버십에서 다룹니다"
+      * "감정 없이 원칙대로 매매하는 시스템, 멤버십에서 공개합니다"
+      * "자동화된 매매 시스템 구축법은 멤버십에서 확인하세요"
+    - 멤버십 콘텐츠 제안도 자동화 관점:
+      * "버핏 20개 투자권을 자동매매로 구현하는 법"
+      * "손절 원칙을 자동 실행하는 EA 설정"
+      * "감정 배제 시스템 구축 가이드"
 """
 
 

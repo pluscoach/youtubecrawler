@@ -554,8 +554,8 @@ function ThumbnailSuggestionsGrid({ suggestions }: { suggestions: ThumbnailSugge
             <span className="text-xs font-medium px-2 py-1 rounded bg-black/20">{item.type}</span>
           </div>
           <p className="text-lg font-bold mb-2">{item.text}</p>
-          <p className="text-sm opacity-80 mb-1">근거: {item.basis}</p>
-          <p className="text-xs opacity-60">심리: {item.click_psychology}</p>
+          <p className="text-sm text-white mb-1">근거: {item.basis}</p>
+          <p className="text-xs text-white">심리: {item.click_psychology}</p>
         </div>
       ))}
     </div>
@@ -721,9 +721,13 @@ function VideoSourcesSection({ sources }: { sources: VideoSourceRecommendation }
                     <td className="py-2 px-2 text-text-secondary">{clip.timestamp}</td>
                     <td className="py-2 px-2">
                       {clip.link ? (
-                        <a href={clip.link} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
-                          바로가기
-                        </a>
+                        clip.link.startsWith('검색:') ? (
+                          <span className="text-yellow-400 text-xs">{clip.link}</span>
+                        ) : (
+                          <a href={clip.link} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+                            바로가기
+                          </a>
+                        )
                       ) : '-'}
                     </td>
                   </tr>
@@ -758,9 +762,13 @@ function VideoSourcesSection({ sources }: { sources: VideoSourceRecommendation }
                     </td>
                     <td className="py-2 px-2">
                       {src.link ? (
-                        <a href={src.link} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
-                          바로가기
-                        </a>
+                        src.link.startsWith('검색:') ? (
+                          <span className="text-yellow-400 text-xs">{src.link}</span>
+                        ) : (
+                          <a href={src.link} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+                            바로가기
+                          </a>
+                        )
                       ) : '-'}
                     </td>
                   </tr>

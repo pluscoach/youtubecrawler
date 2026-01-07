@@ -43,7 +43,7 @@ ANALYSIS_PROMPT_WITH_SUITABILITY = """너는 투자 유튜브 콘텐츠 기획�
                 "quote": "인용된 문장",
                 "source_title": "원본 출처 (책 제목, 인터뷰명 등)",
                 "source_type": "책|인터뷰 영상|기사|주주서한|논문|보고서|출처 확인 필요",
-                "source_url": "URL 또는 null",
+                "source_url": "실제 접근 가능한 URL 또는 null",
                 "search_keywords": ["검색 키워드1", "검색 키워드2"]
             }}
         ]
@@ -83,7 +83,14 @@ ANALYSIS_PROMPT_WITH_SUITABILITY = """너는 투자 유튜브 콘텐츠 기획�
 4. quotes는 자막에서 실제로 나온 문장을 그대로 사용하세요.
 5. 등장 인물이 없으면 빈 배열로 응답하세요.
 6. suitability_score는 1(매우 부적합)~5(매우 적합) 사이 정수
-7. source_tracking: 출처 못 찾으면 source_type을 "출처 확인 필요"로, search_keywords에 검색 키워드 제안
+7. source_tracking 출처 링크 작성 규칙:
+   - 출처 링크는 반드시 실제 접근 가능한 URL로 제공
+   - 기사: 실제 기사 URL (예: https://www.hankyung.com/...)
+   - 논문: Google Scholar 또는 원문 링크
+   - 인터뷰 영상: YouTube 영상 URL (예: https://www.youtube.com/watch?v=...)
+   - 책: 교보문고, Yes24, 알라딘, Google Books 링크
+   - 보고서: 원본 PDF 또는 발행 기관 페이지
+   - URL을 찾을 수 없으면: source_url은 null, source_type은 "출처 확인 필요", search_keywords에 검색 키워드 제안
 """
 
 

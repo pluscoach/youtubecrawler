@@ -116,7 +116,7 @@ function SourceTrackingTable({ sources }: { sources: SourceTracking[] }) {
             <tr key={index} className="border-b border-border/50">
               <td className="py-3 px-2 text-text-secondary max-w-xs">
                 <div className="truncate" title={source.quote}>
-                  &ldquo;{source.quote.substring(0, 50)}...&rdquo;
+                  &ldquo;{source.quote?.substring(0, 50) || ''}...&rdquo;
                 </div>
               </td>
               <td className="py-3 px-2 text-text-primary">{source.source_title}</td>

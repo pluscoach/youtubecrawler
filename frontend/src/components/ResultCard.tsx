@@ -67,19 +67,20 @@ function StarRating({ score, max = 5 }: { score: number; max?: number }) {
   );
 }
 
-function SourceLink({ url, text, verified }: { url?: string | null; text: string; verified?: boolean }) {
+function SourceLink({ url, text, verified }: { url?: string | null; text?: string; verified?: boolean }) {
+  const displayText = text || '-';
   // URL이 있고 Google 검색이 아닌 실제 URL인 경우
   if (url && url.startsWith('http') && !url.includes('google.com/search')) {
     return (
       <a href={url} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
-        {verified ? '✓ ' : '🔗 '}{text}
+        {verified ? '✓ ' : '🔗 '}{displayText}
       </a>
     );
   }
   // URL이 Google 검색 URL이거나 없는 경우
   const searchUrl = url?.includes('google.com/search')
     ? url
-    : (text && text !== '-' ? `https://www.google.com/search?q=${encodeURIComponent(text)}` : null);
+    : (displayText && displayText !== '-' ? `https://www.google.com/search?q=${encodeURIComponent(displayText)}` : null);
 
   if (searchUrl) {
     return (
@@ -89,11 +90,11 @@ function SourceLink({ url, text, verified }: { url?: string | null; text: string
         rel="noopener noreferrer"
         className="text-yellow-400 hover:underline cursor-pointer"
       >
-        🔍 {text}
+        🔍 {displayText}
       </a>
     );
   }
-  return <span className="text-text-secondary">{text}</span>;
+  return <span className="text-text-secondary">{displayText}</span>;
 }
 
 function SourceTrackingTable({ sources }: { sources: SourceTracking[] }) {
@@ -1088,7 +1089,7 @@ export default function ResultCard({ result, onUpdate }: ResultCardProps) {
   const loadPerspectives = async () => {
     const response = await getPerspectives();
     if (response.success) {
-      setPerspectives(response.data);
+      setPerspectives(response.data || []);
     }
   };
 

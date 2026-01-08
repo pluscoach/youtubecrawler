@@ -20,6 +20,9 @@ export interface SourceTracking {
   source_title: string;
   source_url: string | null;
   verified?: boolean;
+  quote?: string;
+  source_type?: string;
+  search_keywords?: string[];
 }
 
 export interface SuitabilityItem {
@@ -46,21 +49,37 @@ export interface SuitabilityAnalysis {
 
 export interface HiddenPremise {
   premise: string;
-  evidence: string;
+  evidence?: string;
+  why_problem?: string;
+  source?: string;
   source_url?: string;
   verified?: boolean;
 }
 
 export interface RealisticContradiction {
-  point: string;
-  evidence: string;
+  point?: string;
+  strategy?: string;
+  evidence?: string;
+  difficulty_reason?: string;
+  evidence_data?: string;
+  source?: string;
   source_url?: string;
   verified?: boolean;
 }
 
 export interface SourceBasedContradiction {
-  claim: string;
-  counter_evidence: string;
+  claim?: string;
+  counter_evidence?: string;
+  original_claim?: string;
+  original_source?: string;
+  original_source_url?: string;
+  counterexample?: string;
+  counterexample_source?: string;
+  counterexample_source_url?: string;
+  hidden_condition?: string;
+  hidden_condition_source?: string;
+  hidden_condition_source_url?: string;
+  conclusion?: string;
   source_url?: string;
   verified?: boolean;
 }
@@ -68,6 +87,23 @@ export interface SourceBasedContradiction {
 export interface HookingPoint {
   hook: string;
   usage: string;
+  point?: string;
+  empathy_reason?: string;
+  target?: string;
+  level?: number;
+}
+
+export interface ContentDirectionStep {
+  stage: string;
+  intention: string;
+  example_script: string;
+}
+
+export interface OldContentDirection {
+  hook?: string;
+  contradiction?: string;
+  empathy?: string;
+  solution_hint?: string;
 }
 
 export interface CriticalAnalysis {
@@ -75,34 +111,165 @@ export interface CriticalAnalysis {
   realistic_contradictions: RealisticContradiction[];
   source_based_contradictions: SourceBasedContradiction[];
   hooking_points: HookingPoint[];
-  content_direction: string[];
+  content_direction: ContentDirectionStep[] | OldContentDirection;
+  perspective_name?: string;
+  perspective_insights?: string[];
 }
 
 export interface InterviewClip {
   person: string;
   topic: string;
   link: string;
+  video_title?: string;
+  quote?: string;
+  timestamp?: string;
 }
 
 export interface EvidenceSource {
   topic: string;
   link: string;
+  contradiction?: string;
+  evidence?: string;
+  source_type?: string;
 }
 
-export interface VideoSources {
+export interface BrollKeyword {
+  keyword: string;
+  scene: string;
+  usage_part: string;
+}
+
+export interface Veo3Prompt {
+  scene: string;
+  usage_part: string;
+  prompt: string;
+}
+
+export interface VideoSourceRecommendation {
   interview_clips: InterviewClip[];
   evidence_sources: EvidenceSource[];
+  broll_keywords?: BrollKeyword[];
+  veo3_prompts?: Veo3Prompt[];
 }
 
 export interface BonusTip {
-  tip: string;
+  tip?: string;
+  topic?: string;
+  summary?: string;
+  why_helpful?: string;
   source: string;
   source_url?: string;
 }
 
+export interface ThumbnailSuggestion {
+  type: string;
+  text: string;
+  basis: string;
+  click_psychology: string;
+}
+
+export interface TitleSuggestion {
+  pattern: string;
+  target: string;
+  title: string;
+  basis: string;
+}
+
+export interface VideoLengthPart {
+  part: string;
+  time_range: string;
+  content: string;
+}
+
+export interface VideoLength {
+  recommended_length: string;
+  format: string;
+  judgment_basis: string;
+  parts?: VideoLengthPart[];
+}
+
+export interface ScriptDirectionItem {
+  part: string;
+  emotion: string;
+  keypoint: string;
+  basis: string;
+}
+
+export interface TargetFit {
+  target: string;
+  fit_level: number;
+  reason: string;
+}
+
+export interface Controversy {
+  level: number;
+  expected_reactions: string;
+}
+
+export interface ExpectedComment {
+  type: string;
+  comment: string;
+}
+
+export interface SeriesExpansion {
+  topic: string;
+  connection: string;
+}
+
+export interface PerformancePrediction {
+  target_fits?: TargetFit[];
+  controversy?: Controversy;
+  expected_comments?: ExpectedComment[];
+  series_expansions?: SeriesExpansion[];
+}
+
+export interface MembershipTiming {
+  timing: string;
+  video_position: string;
+  reason: string;
+}
+
+export interface MembershipContext {
+  previous_line: string;
+  connection: string;
+}
+
+export interface MembershipTeaser {
+  situation: string;
+  teaser: string;
+}
+
+export interface MembershipContentSuggestion {
+  topic: string;
+  connection: string;
+}
+
+export interface MembershipConnection {
+  timings?: MembershipTiming[];
+  contexts?: MembershipContext[];
+  teasers?: MembershipTeaser[];
+  content_suggestions?: MembershipContentSuggestion[];
+}
+
+export interface AdditionalAnalysisResult {
+  thumbnail_suggestions: ThumbnailSuggestion[];
+  title_suggestions: TitleSuggestion[];
+  video_length?: VideoLength;
+  script_directions: ScriptDirectionItem[];
+  bonus_tip?: BonusTip;
+  video_sources?: VideoSourceRecommendation;
+  performance_prediction?: PerformancePrediction;
+  membership_connection?: MembershipConnection;
+}
+
 export interface AdditionalAnalysis {
-  video_sources: VideoSources;
+  video_sources: VideoSourceRecommendation;
   bonus_tip: BonusTip;
+}
+
+export interface Person {
+  name: string;
+  role?: string;
 }
 
 export interface AnalysisResult {
@@ -116,13 +283,13 @@ export interface AnalysisResult {
   key_message: string;
   key_points: string[];
   quotes: Quote[];
-  people: string[];
+  people: Person[];
   investment_strategy: string;
   source_tracking: SourceTracking[];
   suitability_analysis?: SuitabilityAnalysis;
   perspective?: string;
   critical_analysis?: CriticalAnalysis;
-  additional_analysis?: AdditionalAnalysis;
+  additional_analysis?: AdditionalAnalysisResult;
   created_at: string;
 }
 

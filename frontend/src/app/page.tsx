@@ -20,7 +20,7 @@ export default function Home() {
   const loadRecentHistory = async () => {
     const response = await getHistory(5, 0);
     if (response.success) {
-      setRecentHistory(response.data);
+      setRecentHistory(response.data || []);
     }
   };
 

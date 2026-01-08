@@ -22,8 +22,8 @@ export default function HistoryPage() {
     const response = await getHistory(limit, page * limit);
 
     if (response.success) {
-      setItems(response.data);
-      setTotal(response.total);
+      setItems(response.data || []);
+      setTotal(response.total || 0);
     }
     setIsLoading(false);
   };

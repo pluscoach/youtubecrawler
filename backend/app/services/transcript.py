@@ -1,6 +1,27 @@
+import os
 import re
 from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api.proxies import WebshareProxyConfig
 from typing import Optional, Tuple
+
+
+def get_transcript_api():
+    """환경변수에 따라 프록시 사용 여부 결정"""
+    use_proxy = os.getenv("USE_PROXY", "false").lower() == "true"
+
+    if use_proxy:
+        proxy_username = os.getenv("WEBSHARE_USERNAME")
+        proxy_password = os.getenv("WEBSHARE_PASSWORD")
+
+        if proxy_username and proxy_password:
+            return YouTubeTranscriptApi(
+                proxy_config=WebshareProxyConfig(
+                    proxy_username=proxy_username,
+                    proxy_password=proxy_password,
+                )
+            )
+
+    return YouTubeTranscriptApi()
 
 
 def extract_video_id(url: str) -> Optional[str]:
@@ -24,7 +45,7 @@ async def get_transcript(video_id: str) -> Tuple[Optional[str], Optional[str]]:
     한국어 → 영어 → 자동생성 자막 순서로 찾음
     """
     try:
-        api = YouTubeTranscriptApi()
+        api = get_transcript_api()
 
         # 사용 가능한 자막 목록 가져오기
         try:

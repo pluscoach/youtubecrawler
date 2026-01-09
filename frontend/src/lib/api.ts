@@ -93,6 +93,34 @@ export interface HookingPoint {
   level?: number;
 }
 
+// 자동화 관점 인사이트
+export interface ProblemSolutionItem {
+  problem: string;
+  human_difficulty: string;
+  automation_solution: string;
+  implementation: string;
+}
+
+export interface LifeExpansionExample {
+  area: string;
+  principle: string;
+  application: string;
+}
+
+export interface LifeExpansion {
+  applicable: boolean;
+  areas: string[];
+  examples: LifeExpansionExample[];
+}
+
+export interface AutomationInsight {
+  video_type: string;
+  video_type_reason?: string;
+  problem_solution_table: ProblemSolutionItem[];
+  core_insight: string;
+  life_expansion?: LifeExpansion;
+}
+
 export interface ContentDirectionStep {
   stage: string;
   intention: string;
@@ -114,6 +142,14 @@ export interface CriticalAnalysis {
   content_direction: ContentDirectionStep[] | OldContentDirection;
   perspective_name?: string;
   perspective_insights?: string[];
+  auto_trading_connection?: Array<{
+    strategy_content: string;
+    implementation_method: string;
+    tech_stack: string;
+    feasibility: string;
+    limitation?: string;
+  }>;
+  automation_insight?: AutomationInsight;
 }
 
 export interface InterviewClip {
@@ -272,6 +308,13 @@ export interface Person {
   role?: string;
 }
 
+export interface VideoStructureItem {
+  order: number;
+  element: string;
+  type?: string | null;
+  description: string;
+}
+
 export interface AnalysisResult {
   id: string;
   video_id: string;
@@ -279,6 +322,16 @@ export interface AnalysisResult {
   video_url: string;
   channel_name: string;
   thumbnail_url: string;
+  // 영상 성과 데이터
+  view_count?: number;
+  like_count?: number;
+  comment_count?: number;
+  subscriber_count?: number;
+  view_sub_ratio?: number;
+  published_at?: string;
+  // 영상 구조 분석
+  video_structure?: VideoStructureItem[];
+  structure_summary?: string;
   summary: string;
   key_message: string;
   key_points: string[];

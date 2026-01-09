@@ -104,6 +104,42 @@ class SourceTracking(BaseModel):
     search_keywords: List[str] = Field(default_factory=list, description="검색 키워드 제안")
 
 
+# 영상 구조 항목 스키마
+class VideoStructureItem(BaseModel):
+    order: int = Field(..., description="순서")
+    element: str = Field(..., description="요소 (후킹/권위 인정/핵심 주장 등)")
+    type: Optional[str] = Field(None, description="유형 (질문형/충격형 등)")
+    description: str = Field(..., description="실행 방식")
+
+
+# 자동화 관점 인사이트 스키마
+class ProblemSolutionItem(BaseModel):
+    problem: str = Field(..., description="문제점 (현실적 모순에서 추출)")
+    human_difficulty: str = Field(..., description="사람이 힘든 이유 (숨겨진 전제에서)")
+    automation_solution: str = Field(..., description="자동화 해결책")
+    implementation: str = Field(..., description="구현 방법 (지표, API, 코드 등)")
+
+
+class LifeExpansionExample(BaseModel):
+    area: str = Field(..., description="적용 영역")
+    principle: str = Field(..., description="투자에서 추출한 원리")
+    application: str = Field(..., description="구체적 적용 방법")
+
+
+class LifeExpansion(BaseModel):
+    applicable: bool = Field(default=False, description="적용 가능 여부")
+    areas: List[str] = Field(default_factory=list, description="적용 가능 영역")
+    examples: List[LifeExpansionExample] = Field(default_factory=list, description="구체적 예시")
+
+
+class AutomationInsight(BaseModel):
+    video_type: str = Field(..., description="영상 유형 (매매 기법/가치 투자/심리/리스크)")
+    video_type_reason: Optional[str] = Field(None, description="유형 판단 이유")
+    problem_solution_table: List[ProblemSolutionItem] = Field(default_factory=list, description="문제-해결책 테이블")
+    core_insight: str = Field(..., description="핵심 인사이트 한 문장")
+    life_expansion: Optional[LifeExpansion] = Field(None, description="삶의 영역 확장 가능성")
+
+
 # 모순 분석 출처 항목 스키마
 class ContradictionSourceItem(BaseModel):
     content: str = Field(..., description="내용")
@@ -137,6 +173,9 @@ class CriticalAnalysis(BaseModel):
     hooking_points: List[Any] = Field(default_factory=list, description="후킹 포인트")
     content_direction: Any = Field(default_factory=list, description="콘텐츠 방향 (단계별 또는 dict)")
     perspective_insights: List[str] = Field(default_factory=list, description="관점별 인사이트")
+    # 자동화 관점 인사이트 (강화됨)
+    auto_trading_connection: List[Any] = Field(default_factory=list, description="자동매매 연결 (기존)")
+    automation_insight: Optional[Dict[str, Any]] = Field(None, description="자동화 관점 인사이트 (강화)")
     # 기존 호환 (deprecated)
     contradiction_analyses: List[Any] = Field(default_factory=list, description="출처 기반 모순 분석 (deprecated)")
 
@@ -195,6 +234,16 @@ class AnalysisResult(BaseModel):
     channel_name: str
     thumbnail_url: str
     transcript: Optional[str] = None
+    # 영상 성과 데이터
+    view_count: Optional[int] = Field(None, description="조회수")
+    like_count: Optional[int] = Field(None, description="좋아요 수")
+    comment_count: Optional[int] = Field(None, description="댓글 수")
+    subscriber_count: Optional[int] = Field(None, description="채널 구독자 수")
+    view_sub_ratio: Optional[float] = Field(None, description="조회수/구독자 비율")
+    published_at: Optional[str] = Field(None, description="업로드 일자")
+    # 영상 구조 분석
+    video_structure: List[Any] = Field(default_factory=list, description="영상 구조 분석")
+    structure_summary: Optional[str] = Field(None, description="구조 요약 (예: 후킹→권위→주장→근거→CTA)")
     # 기본 영상 분석
     summary: str = Field(default="", description="영상 요약 (3~5줄)")
     key_message: str = Field(default="", description="핵심 메시지 (한 문장)")

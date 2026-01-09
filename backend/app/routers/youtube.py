@@ -99,6 +99,16 @@ async def analyze_video(request: AnalyzeRequest):
                 video_url=existing.get('video_url'),
                 channel_name=existing.get('channel_name'),
                 thumbnail_url=existing.get('thumbnail_url'),
+                # 영상 성과 데이터
+                view_count=existing.get('view_count'),
+                like_count=existing.get('like_count'),
+                comment_count=existing.get('comment_count'),
+                subscriber_count=existing.get('subscriber_count'),
+                view_sub_ratio=existing.get('view_sub_ratio'),
+                published_at=existing.get('published_at'),
+                # 영상 구조 분석
+                video_structure=existing.get('video_structure', []),
+                structure_summary=existing.get('structure_summary'),
                 summary=existing.get('summary', ''),
                 key_message=existing.get('key_message', ''),
                 key_points=existing.get('key_points', []),
@@ -143,6 +153,7 @@ async def analyze_video(request: AnalyzeRequest):
 
         # 새 프롬프트 응답 구조 파싱
         video_analysis = analysis.get('video_analysis', {})
+        video_structure_data = analysis.get('video_structure', {})
 
         # 디버그: source_tracking 확인
         st = video_analysis.get('source_tracking', [])
@@ -168,6 +179,16 @@ async def analyze_video(request: AnalyzeRequest):
             "channel_name": video_info['channel_name'],
             "thumbnail_url": video_info['thumbnail_url'],
             "transcript": transcript[:10000] if transcript else None,
+            # 영상 성과 데이터
+            "view_count": video_info.get('view_count'),
+            "like_count": video_info.get('like_count'),
+            "comment_count": video_info.get('comment_count'),
+            "subscriber_count": video_info.get('subscriber_count'),
+            "view_sub_ratio": video_info.get('view_sub_ratio'),
+            "published_at": video_info.get('published_at'),
+            # 영상 구조 분석
+            "video_structure": video_structure_data.get('structure_items', []),
+            "structure_summary": video_structure_data.get('structure_summary'),
             "summary": video_analysis.get('summary', ''),
             "key_message": video_analysis.get('key_message', ''),
             "key_points": video_analysis.get('key_points', []),
@@ -193,6 +214,16 @@ async def analyze_video(request: AnalyzeRequest):
             video_url=request.url,
             channel_name=video_info['channel_name'],
             thumbnail_url=video_info['thumbnail_url'],
+            # 영상 성과 데이터
+            view_count=video_info.get('view_count'),
+            like_count=video_info.get('like_count'),
+            comment_count=video_info.get('comment_count'),
+            subscriber_count=video_info.get('subscriber_count'),
+            view_sub_ratio=video_info.get('view_sub_ratio'),
+            published_at=video_info.get('published_at'),
+            # 영상 구조 분석
+            video_structure=video_structure_data.get('structure_items', []),
+            structure_summary=video_structure_data.get('structure_summary'),
             summary=video_analysis.get('summary', ''),
             key_message=video_analysis.get('key_message', ''),
             key_points=video_analysis.get('key_points', []),
@@ -338,6 +369,16 @@ async def get_result(analysis_id: str):
             video_url=result.get('video_url'),
             channel_name=result.get('channel_name'),
             thumbnail_url=result.get('thumbnail_url'),
+            # 영상 성과 데이터
+            view_count=result.get('view_count'),
+            like_count=result.get('like_count'),
+            comment_count=result.get('comment_count'),
+            subscriber_count=result.get('subscriber_count'),
+            view_sub_ratio=result.get('view_sub_ratio'),
+            published_at=result.get('published_at'),
+            # 영상 구조 분석
+            video_structure=result.get('video_structure', []),
+            structure_summary=result.get('structure_summary'),
             summary=result.get('summary', ''),
             key_message=result.get('key_message', ''),
             key_points=result.get('key_points', []),
@@ -456,6 +497,16 @@ async def analyze_critical_endpoint(request: CriticalAnalyzeRequest):
             video_url=updated.get('video_url'),
             channel_name=updated.get('channel_name'),
             thumbnail_url=updated.get('thumbnail_url'),
+            # 영상 성과 데이터
+            view_count=updated.get('view_count'),
+            like_count=updated.get('like_count'),
+            comment_count=updated.get('comment_count'),
+            subscriber_count=updated.get('subscriber_count'),
+            view_sub_ratio=updated.get('view_sub_ratio'),
+            published_at=updated.get('published_at'),
+            # 영상 구조 분석
+            video_structure=updated.get('video_structure', []),
+            structure_summary=updated.get('structure_summary'),
             summary=updated.get('summary', ''),
             key_message=updated.get('key_message', ''),
             key_points=updated.get('key_points', []),
@@ -521,7 +572,8 @@ async def analyze_additional_endpoint(request: AdditionalAnalyzeRequest):
             realistic_contradictions=critical_analysis.get('realistic_contradictions', []),
             source_based_contradictions=critical_analysis.get('source_based_contradictions', []),
             hooking_points=critical_analysis.get('hooking_points', []),
-            content_direction=critical_analysis.get('content_direction', [])
+            content_direction=critical_analysis.get('content_direction', []),
+            automation_insight=critical_analysis.get('automation_insight')
         )
 
         if error:
@@ -550,6 +602,16 @@ async def analyze_additional_endpoint(request: AdditionalAnalyzeRequest):
             video_url=updated.get('video_url'),
             channel_name=updated.get('channel_name'),
             thumbnail_url=updated.get('thumbnail_url'),
+            # 영상 성과 데이터
+            view_count=updated.get('view_count'),
+            like_count=updated.get('like_count'),
+            comment_count=updated.get('comment_count'),
+            subscriber_count=updated.get('subscriber_count'),
+            view_sub_ratio=updated.get('view_sub_ratio'),
+            published_at=updated.get('published_at'),
+            # 영상 구조 분석
+            video_structure=updated.get('video_structure', []),
+            structure_summary=updated.get('structure_summary'),
             summary=updated.get('summary', ''),
             key_message=updated.get('key_message', ''),
             key_points=updated.get('key_points', []),

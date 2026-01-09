@@ -23,6 +23,8 @@ import type {
   VideoSourceRecommendation,
   PerformancePrediction,
   MembershipConnection,
+  VideoStructureItem,
+  AutomationInsight,
 } from '@/lib/api';
 import { analyzeCritical, analyzeAdditional, getPerspectives } from '@/lib/api';
 
@@ -64,6 +66,230 @@ function StarRating({ score, max = 5 }: { score: number; max?: number }) {
       {'★'.repeat(Math.min(score, max))}
       {'☆'.repeat(Math.max(max - score, 0))}
     </span>
+  );
+}
+
+function formatNumber(num: number | undefined): string {
+  if (num === undefined || num === null) return '-';
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + 'M';
+  }
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'K';
+  }
+  return num.toLocaleString();
+}
+
+function getViewSubRatioLabel(ratio: number | undefined): { label: string; color: string } {
+  if (ratio === undefined || ratio === null) return { label: '-', color: 'text-text-secondary' };
+  if (ratio >= 10) return { label: '알고리즘 대박', color: 'text-green-400' };
+  if (ratio >= 5) return { label: '알고리즘 성과 좋음', color: 'text-blue-400' };
+  if (ratio >= 2) return { label: '평균', color: 'text-yellow-400' };
+  return { label: '구독자 기반 조회', color: 'text-text-secondary' };
+}
+
+function formatDate(dateStr: string | undefined): string {
+  if (!dateStr) return '-';
+  try {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+  } catch {
+    return dateStr;
+  }
+}
+
+function VideoPerformanceSection({ result }: { result: AnalysisResult }) {
+  const hasPerformanceData = result.view_count !== undefined || result.subscriber_count !== undefined;
+  if (!hasPerformanceData) return null;
+
+  const ratioInfo = getViewSubRatioLabel(result.view_sub_ratio);
+
+  return (
+    <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/30 rounded-xl p-4 mb-4">
+      <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
+        <span>📊</span> 영상 성과
+      </h4>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+        <div>
+          <span className="text-text-secondary">조회수: </span>
+          <span className="text-text-primary font-medium">{formatNumber(result.view_count)}</span>
+        </div>
+        <div>
+          <span className="text-text-secondary">좋아요: </span>
+          <span className="text-text-primary font-medium">{formatNumber(result.like_count)}</span>
+        </div>
+        <div>
+          <span className="text-text-secondary">댓글: </span>
+          <span className="text-text-primary font-medium">{formatNumber(result.comment_count)}</span>
+        </div>
+        <div>
+          <span className="text-text-secondary">구독자: </span>
+          <span className="text-text-primary font-medium">{formatNumber(result.subscriber_count)}</span>
+        </div>
+        <div>
+          <span className="text-text-secondary">조회/구독: </span>
+          <span className={`font-medium ${ratioInfo.color}`}>
+            {result.view_sub_ratio !== undefined ? `${result.view_sub_ratio}배` : '-'}
+          </span>
+          <span className={`text-xs ml-1 ${ratioInfo.color}`}>({ratioInfo.label})</span>
+        </div>
+        <div>
+          <span className="text-text-secondary">업로드: </span>
+          <span className="text-text-primary font-medium">{formatDate(result.published_at)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VideoStructureSection({ structure, summary }: { structure?: VideoStructureItem[]; summary?: string }) {
+  if (!structure || structure.length === 0) return null;
+
+  const getElementColor = (element: string) => {
+    if (element.includes('후킹')) return 'bg-red-500/20 text-red-400 border-red-500/30';
+    if (element.includes('권위')) return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
+    if (element.includes('주장')) return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+    if (element.includes('근거')) return 'bg-green-500/20 text-green-400 border-green-500/30';
+    if (element.includes('반박') || element.includes('모순')) return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+    if (element.includes('해결')) return 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30';
+    if (element.includes('꿀팁')) return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
+    if (element.includes('CTA')) return 'bg-pink-500/20 text-pink-400 border-pink-500/30';
+    return 'bg-border/20 text-text-secondary border-border';
+  };
+
+  return (
+    <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-xl p-4 mb-4">
+      <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
+        <span>🎬</span> 영상 구조
+      </h4>
+
+      {summary && (
+        <div className="mb-4 p-3 bg-black/20 rounded-lg">
+          <span className="text-text-secondary text-sm">구조 요약: </span>
+          <span className="text-accent font-medium">{summary}</span>
+        </div>
+      )}
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border">
+              <th className="text-left py-2 px-2 text-text-secondary font-medium w-12">순서</th>
+              <th className="text-left py-2 px-2 text-text-secondary font-medium w-24">요소</th>
+              <th className="text-left py-2 px-2 text-text-secondary font-medium w-20">유형</th>
+              <th className="text-left py-2 px-2 text-text-secondary font-medium">실행 방식</th>
+            </tr>
+          </thead>
+          <tbody>
+            {structure.map((item, index) => (
+              <tr key={index} className="border-b border-border/50">
+                <td className="py-2 px-2 text-text-primary font-bold">{item.order}</td>
+                <td className="py-2 px-2">
+                  <span className={`px-2 py-1 rounded text-xs border ${getElementColor(item.element)}`}>
+                    {item.element}
+                  </span>
+                </td>
+                <td className="py-2 px-2 text-text-secondary">{item.type || '-'}</td>
+                <td className="py-2 px-2 text-text-secondary">{item.description}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function AutomationInsightSection({ insight }: { insight?: AutomationInsight }) {
+  if (!insight) return null;
+
+  const getVideoTypeColor = (type: string) => {
+    if (type.includes('매매')) return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+    if (type.includes('가치')) return 'bg-green-500/20 text-green-400 border-green-500/30';
+    if (type.includes('심리')) return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
+    if (type.includes('리스크')) return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
+    return 'bg-border/20 text-text-secondary border-border';
+  };
+
+  return (
+    <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-xl p-4 mb-4">
+      <h4 className="text-lg font-semibold text-text-primary mb-3 flex items-center gap-2">
+        <span>🤖</span> 자동화 관점 인사이트
+      </h4>
+
+      {/* 영상 유형 */}
+      <div className="mb-4 flex items-center gap-2">
+        <span className="text-text-secondary text-sm">영상 유형:</span>
+        <span className={`px-3 py-1 rounded-full text-sm border ${getVideoTypeColor(insight.video_type)}`}>
+          {insight.video_type}
+        </span>
+        {insight.video_type_reason && (
+          <span className="text-text-secondary text-xs">({insight.video_type_reason})</span>
+        )}
+      </div>
+
+      {/* 문제-해결책 테이블 */}
+      {insight.problem_solution_table && insight.problem_solution_table.length > 0 && (
+        <div className="mb-4">
+          <h5 className="text-sm font-medium text-text-secondary mb-2">문제 → 자동화 해결책</h5>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">문제점</th>
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">사람이 힘든 이유</th>
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">자동화 해결책</th>
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">구현 방법</th>
+                </tr>
+              </thead>
+              <tbody>
+                {insight.problem_solution_table.map((item, index) => (
+                  <tr key={index} className="border-b border-border/50">
+                    <td className="py-2 px-2 text-red-400">{item.problem}</td>
+                    <td className="py-2 px-2 text-yellow-400">{item.human_difficulty}</td>
+                    <td className="py-2 px-2 text-green-400">{item.automation_solution}</td>
+                    <td className="py-2 px-2 text-cyan-400 font-mono text-xs">{item.implementation}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* 핵심 인사이트 */}
+      {insight.core_insight && (
+        <div className="mb-4 p-3 bg-black/30 rounded-lg border border-accent/30">
+          <span className="text-accent font-medium">💡 핵심:</span>
+          <p className="text-text-primary mt-1">{insight.core_insight}</p>
+        </div>
+      )}
+
+      {/* 삶의 영역 확장 */}
+      {insight.life_expansion?.applicable && (
+        <div className="mt-4">
+          <h5 className="text-sm font-medium text-text-secondary mb-2">🌱 삶의 영역 확장 가능성</h5>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {insight.life_expansion.areas.map((area, index) => (
+              <span key={index} className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs">
+                {area}
+              </span>
+            ))}
+          </div>
+          {insight.life_expansion.examples && insight.life_expansion.examples.length > 0 && (
+            <div className="space-y-2">
+              {insight.life_expansion.examples.map((ex, index) => (
+                <div key={index} className="text-sm p-2 bg-black/20 rounded">
+                  <span className="text-purple-400">{ex.area}</span>
+                  <span className="text-text-secondary"> → </span>
+                  <span className="text-text-primary">{ex.application}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -1171,6 +1397,12 @@ export default function ResultCard({ result, onUpdate }: ResultCardProps) {
           <span>📺</span> 영상 분석
         </h2>
 
+        {/* 영상 성과 */}
+        <VideoPerformanceSection result={result} />
+
+        {/* 영상 구조 */}
+        <VideoStructureSection structure={result.video_structure} summary={result.structure_summary} />
+
         <Section icon="📌" title="영상 요약">
           <p className="text-text-secondary whitespace-pre-line">{result.summary}</p>
         </Section>
@@ -1319,6 +1551,10 @@ export default function ResultCard({ result, onUpdate }: ResultCardProps) {
               {result.critical_analysis.perspective_name}
             </span>
           </h2>
+
+          {/* 자동화 관점 인사이트 (2단계에서 추가됨) */}
+          <AutomationInsightSection insight={result.critical_analysis.automation_insight} />
+
           <CriticalAnalysisSection analysis={result.critical_analysis} />
         </div>
       )}

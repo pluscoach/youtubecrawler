@@ -198,7 +198,31 @@ CRITICAL_ANALYSIS_PROMPT = """너는 투자 철학 비평가야. 감정적 비�
             "feasibility": "높음/중간/낮음/불가능",
             "limitation": "구현 시 한계점 (있으면)"
         }}
-    ]
+    ],
+    "automation_insight": {{
+        "video_type": "매매 기법|가치 투자|심리/멘탈|리스크 관리",
+        "video_type_reason": "왜 이 유형인지 설명",
+        "problem_solution_table": [
+            {{
+                "problem": "현실적 모순에서 추출한 문제점",
+                "human_difficulty": "사람이 힘든 이유 (숨겨진 전제에서)",
+                "automation_solution": "자동화 해결책 (기술적)",
+                "implementation": "실제 구현 예시 (지표, 도구, 코드 등)"
+            }}
+        ],
+        "core_insight": "한 문장 요약: 이 전략은 [전제]를 가정하는데, 사람이 직접 하기엔 [한계]가 있다. → [자동화 방법]을 적용하면 실행 가능해진다.",
+        "life_expansion": {{
+            "applicable": true,
+            "areas": ["습관 관리", "지출 관리", "학습 루틴"],
+            "examples": [
+                {{
+                    "area": "적용 영역",
+                    "principle": "투자에서 추출한 원리",
+                    "application": "구체적 적용 방법"
+                }}
+            ]
+        }}
+    }}
 }}
 
 ---
@@ -227,6 +251,33 @@ CRITICAL_ANALYSIS_PROMPT = """너는 투자 철학 비평가야. 감정적 비�
    - ❌ "자동으로 수익 나는 시스템"
    - ✅ "조건 충족 시 자동 매수 신호 발생"
    - ✅ "재무 지표 기준 종목 필터링"
+
+[자동화 관점 인사이트 작성 규칙]
+
+1. video_type 판단 기준:
+   - 매매 기법: 타이밍, 진입/청산 기준 → 지표 기반 자동화
+   - 가치 투자: 기업 분석, 종목 선정 → 정보 수집/스크리닝 자동화
+   - 심리/멘탈: 감정 통제, 인내 → 강제 룰/차단 시스템
+   - 리스크 관리: 자금 관리, 분산 → 포지션/비중 자동 조절
+
+2. problem_solution_table 작성 규칙:
+   - problem: 현실적 모순(realistic_contradictions)에서 추출
+   - human_difficulty: 숨겨진 전제(hidden_premises)에서 추출
+   - automation_solution: 기술적으로 해결 가능한 방법
+   - implementation: 구체적 구현 예시 (지표명, API명, 코드 패턴 등)
+   - 예시:
+     | 공포장에서 매수 못함 | 감정이 판단을 압도 | 조건 충족 시 자동 매수 | VIX 30+ & RSI 30- → 자동 진입 |
+     | 좋은 기업 못 찾음 | 수백 개 재무제표 분석 불가 | 자동 스크리닝 | PER 10- & ROE 15%+ → 리스트 생성 |
+     | 손절 못함 | 손실 회피 편향 | 강제 청산 룰 | -5% 도달 → 자동 종료 |
+
+3. core_insight 형식:
+   "이 전략은 [전제]를 가정하는데, 사람이 직접 하기엔 [한계]가 있다.
+   → [자동화 방법]을 적용하면 실행 가능해진다."
+
+4. life_expansion 작성 규칙:
+   - 투자 외 삶의 영역에도 동일 원리 적용 가능한지 분석
+   - 적용 가능 영역: 습관 관리, 지출 관리, 학습 루틴, 시간 관리 등
+   - 구체적 예시 제시
 """
 
 

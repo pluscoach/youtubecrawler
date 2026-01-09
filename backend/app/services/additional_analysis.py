@@ -25,6 +25,12 @@ ADDITIONAL_ANALYSIS_PROMPT = """너는 투자 유튜브 콘텐츠 전문 기획�
 - 후킹 포인트: {hooking_points}
 - 콘텐츠 방향: {content_direction}
 
+[입력 데이터 - 2단계 자동화 관점 인사이트]
+- 영상 유형: {automation_video_type}
+- 문제-해결책 테이블: {automation_table}
+- 핵심 인사이트: {automation_core_insight}
+- 삶의 영역 확장: {automation_life_expansion}
+
 [채널 철학 - 고정값]
 - 핵심 메시지: 거장의 전략은 틀리지 않았다. 문제는 실행이다.
 - 톤: 비판적이지만 논리적, 감정적 비난 X
@@ -167,8 +173,23 @@ ADDITIONAL_ANALYSIS_PROMPT = """너는 투자 유튜브 콘텐츠 전문 기획�
         "topic": "멤버십 콘텐츠 주제 (자동화 관점)",
         "connection": "이 영상과 연결점"
       }}
+    ],
+    "automation_based_contents": [
+      {{
+        "automation_solution": "2단계 문제-해결책 테이블의 자동화 해결책",
+        "content_suggestion": "멤버십에서 다룰 구체적 구현 방법",
+        "teaser_text": "영상에서 사용할 티저 문구"
+      }}
     ]
-  }}
+  }},
+  "series_expansions_v2": [
+    {{
+      "topic": "후속 영상 주제 (자동화 인사이트 기반)",
+      "target": "타겟 시청자",
+      "hooking_point": "후킹 포인트",
+      "connection_to_automation": "자동화 인사이트와의 연결점"
+    }}
+  ]
 }}
 
 [주의사항]
@@ -229,6 +250,25 @@ ADDITIONAL_ANALYSIS_PROMPT = """너는 투자 유튜브 콘텐츠 전문 기획�
       * "AI가 종목 추천해주는 시스템" (과장)
       * "수익률 보장 전략" (불가능)
       * "기업 분석 자동화" (질적 분석 불가)
+
+17. 자동화 관점 인사이트 활용 (2단계 데이터 기반):
+    - automation_based_contents: 2단계 problem_solution_table의 각 항목을 기반으로 작성
+      * automation_solution: 2단계 테이블의 "자동화 해결책" 그대로 사용
+      * content_suggestion: 해당 해결책의 구체적 구현 방법 (멤버십 콘텐츠로)
+      * teaser_text: "실제 ~하는 방법은 멤버십에서" 형식
+    - 예시:
+      | VIX+RSI 자동 매수 | MT5 자동매매 EA 설정법 | "공포장 자동 매수 시스템, 멤버십에서 공개합니다" |
+      | 재무제표 자동 스크리닝 | Python 스크리닝 봇 만들기 | "수백 개 기업 1분 만에 필터링하는 법" |
+
+18. 시리즈 확장 v2 (자동화 인사이트 기반):
+    - 2단계 life_expansion 데이터를 활용하여 후속 영상 주제 제안
+    - 투자 외 영역 적용 시리즈 가능 여부 분석
+    - connection_to_automation: 자동화 원리가 어떻게 적용되는지 설명
+
+19. 해결 암시 파트 (script_directions):
+    - 자동화 핵심 인사이트를 간접적으로 녹여서 표현
+    - 직접 언급 X, "시스템으로 해결할 수 있다" 정도로만
+    - 2단계 core_insight를 활용하되 완전히 공개하지 않음
 """
 
 
@@ -276,7 +316,8 @@ async def analyze_additional(
     realistic_contradictions: List[Any],
     source_based_contradictions: List[Any],
     hooking_points: List[Any],
-    content_direction: Any
+    content_direction: Any,
+    automation_insight: Optional[Dict] = None
 ) -> tuple[Optional[Dict], Optional[str]]:
     """
     Claude API로 추가 분석 수행 (1단계 + 2단계 결과 기반)
@@ -286,6 +327,22 @@ async def analyze_additional(
     """
     try:
         client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+
+        # 자동화 인사이트 데이터 포맷팅
+        automation_video_type = "없음"
+        automation_table = "없음"
+        automation_core_insight = "없음"
+        automation_life_expansion = "없음"
+
+        if automation_insight:
+            automation_video_type = f"{automation_insight.get('video_type', '없음')} - {automation_insight.get('video_type_reason', '')}"
+            problem_table = automation_insight.get('problem_solution_table', [])
+            if problem_table:
+                automation_table = json.dumps(problem_table, ensure_ascii=False)
+            automation_core_insight = automation_insight.get('core_insight', '없음')
+            life_exp = automation_insight.get('life_expansion', {})
+            if life_exp:
+                automation_life_expansion = json.dumps(life_exp, ensure_ascii=False)
 
         # 프롬프트 생성
         prompt = ADDITIONAL_ANALYSIS_PROMPT.format(
@@ -301,7 +358,11 @@ async def analyze_additional(
             realistic_contradictions=format_list_for_prompt(realistic_contradictions),
             source_based_contradictions=format_list_for_prompt(source_based_contradictions),
             hooking_points=format_list_for_prompt(hooking_points),
-            content_direction=json.dumps(content_direction, ensure_ascii=False) if content_direction else "없음"
+            content_direction=json.dumps(content_direction, ensure_ascii=False) if content_direction else "없음",
+            automation_video_type=automation_video_type,
+            automation_table=automation_table,
+            automation_core_insight=automation_core_insight,
+            automation_life_expansion=automation_life_expansion
         )
 
         message = client.messages.create(

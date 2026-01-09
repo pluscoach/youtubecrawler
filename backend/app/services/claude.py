@@ -15,10 +15,10 @@ settings = get_settings()
 MODEL_FAST = "claude-3-haiku-20240307"  # 1단계: 빠른 필터링
 MODEL_QUALITY = "claude-sonnet-4-20250514"  # 2~3단계: 상세 분석
 
-# 1단계: 영상 분석 + 소재 적합성 판단 프롬프트
+# 1단계: 영상 분석 + 소재 적합성 판단 + 영상 구조 분석 프롬프트
 ANALYSIS_PROMPT_WITH_SUITABILITY = """너는 투자 유튜브 콘텐츠 기획자야.
 
-아래 영상 자막을 분석해서 두 가지를 출력해줘.
+아래 영상 자막을 분석해서 세 가지를 출력해줘.
 
 [영상 자막]
 {transcript}
@@ -47,6 +47,23 @@ ANALYSIS_PROMPT_WITH_SUITABILITY = """너는 투자 유튜브 콘텐츠 기획�
                 "search_keywords": ["검색 키워드1", "검색 키워드2"]
             }}
         ]
+    }},
+    "video_structure": {{
+        "structure_items": [
+            {{
+                "order": 1,
+                "element": "후킹",
+                "type": "질문형|충격형|공감형|권위형",
+                "description": "실제 사용된 문장이나 방식"
+            }},
+            {{
+                "order": 2,
+                "element": "권위 인정",
+                "type": null,
+                "description": "인물 소개, 실적 언급 등"
+            }}
+        ],
+        "structure_summary": "후킹(질문) → 권위 → 주장 → 근거 → 반박 → CTA"
     }},
     "suitability_analysis": {{
         "feasibility_issue": {{
@@ -104,6 +121,12 @@ ANALYSIS_PROMPT_WITH_SUITABILITY = """너는 투자 유튜브 콘텐츠 기획�
    - 없음: 물리적 행동, 경영진 면담, 직관/경험 기반 판단
    - implementable에는 실제 코드로 구현 가능한 요소만 작성
    - not_implementable에는 코드로 구현 불가능한 요소 작성
+9. video_structure (영상 구조 분석) 작성 규칙:
+   - 영상에서 사용된 구조 요소들을 순서대로 분석
+   - element 종류: 후킹, 권위 인정, 핵심 주장, 근거 제시, 반박/모순 제기, 해결 암시, 꿀팁, CTA
+   - 후킹 type 종류: 질문형, 충격형, 공감형, 권위형
+   - description은 실제 영상에서 사용된 문장이나 방식 구체적으로 작성
+   - structure_summary는 "후킹(질문) → 권위 → 주장 → 근거 → CTA" 형식으로 요약
 """
 
 

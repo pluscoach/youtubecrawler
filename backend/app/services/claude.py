@@ -258,6 +258,9 @@ async def analyze_critical_v2(
             analysis_result = parse_json_response(response_text)
             perspective = get_perspective(perspective_id)
 
+            # DEBUG: Claude 원본 응답 키 확인
+            print(f"[DEBUG] Claude 원본 응답 keys: {analysis_result.keys()}")
+
             # 새 구조로 정규화
             normalized_result = {
                 "perspective": perspective_id,
@@ -268,8 +271,15 @@ async def analyze_critical_v2(
                 "hooking_points": analysis_result.get("hooking_points", []),
                 "content_direction": analysis_result.get("content_direction", []),
                 "perspective_insights": analysis_result.get("perspective_insights", []),
+                "auto_trading_connection": analysis_result.get("auto_trading_connection", []),
+                "automation_insight": analysis_result.get("automation_insight"),
                 "contradiction_analyses": [],  # deprecated
             }
+
+            # DEBUG: automation_insight 확인
+            print(f"[DEBUG] Claude 응답에서 automation_insight 존재: {'automation_insight' in analysis_result}")
+            if analysis_result.get("automation_insight"):
+                print(f"[DEBUG] automation_insight keys: {analysis_result.get('automation_insight').keys()}")
 
             return normalized_result, None
 

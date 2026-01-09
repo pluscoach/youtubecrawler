@@ -40,50 +40,50 @@ class Person(BaseModel):
 
 # 후킹 포인트 스키마 (새 구조)
 class HookingPoint(BaseModel):
-    point: str = Field(..., description="후킹 포인트 (반전 요소 포함)")
-    empathy_reason: str = Field(default="", description="공감 이유")
-    target: str = Field(default="", description="타겟 (직장인/대학생/부업러 등)")
-    level: int = Field(..., description="후킹 레벨 (1~5)")
+    point: Optional[str] = Field(None, description="후킹 포인트 (반전 요소 포함)")
+    empathy_reason: Optional[str] = Field("", description="공감 이유")
+    target: Optional[str] = Field("", description="타겟 (직장인/대학생/부업러 등)")
+    level: Optional[int] = Field(None, description="후킹 레벨 (1~5)")
 
 
 # 콘텐츠 방향 스키마 (새 구조 - 단계별)
 class ContentDirectionStep(BaseModel):
-    stage: str = Field(..., description="단계 (후킹/모순지적/공감/해결암시)")
-    example_script: str = Field(..., description="예시 대사")
-    intention: str = Field(..., description="의도")
+    stage: Optional[str] = Field(None, description="단계 (후킹/모순지적/공감/해결암시)")
+    example_script: Optional[str] = Field(None, description="예시 대사")
+    intention: Optional[str] = Field(None, description="의도")
 
 
 # 숨겨진 전제 스키마 (새 구조)
 class HiddenPremise(BaseModel):
-    premise: str = Field(..., description="암묵적으로 가정하는 조건")
-    why_problem: str = Field(..., description="왜 비현실적인지 데이터로 증명")
-    source: str = Field(..., description="출처명")
+    premise: Optional[str] = Field(None, description="암묵적으로 가정하는 조건")
+    why_problem: Optional[str] = Field(None, description="왜 비현실적인지 데이터로 증명")
+    source: Optional[str] = Field(None, description="출처명")
     source_url: Optional[str] = Field(None, description="출처 URL")
     verified: Optional[bool] = Field(None, description="Tavily로 검증 여부")
 
 
 # 현실적 모순 스키마 (새 구조)
 class RealisticContradiction(BaseModel):
-    strategy: str = Field(..., description="영상에서 말한 전략")
-    difficulty_reason: str = Field(..., description="실행 어려운 이유")
-    evidence_data: str = Field(..., description="근거 데이터")
-    source: str = Field(..., description="출처명")
+    strategy: Optional[str] = Field(None, description="영상에서 말한 전략")
+    difficulty_reason: Optional[str] = Field(None, description="실행 어려운 이유")
+    evidence_data: Optional[str] = Field(None, description="근거 데이터")
+    source: Optional[str] = Field(None, description="출처명")
     source_url: Optional[str] = Field(None, description="출처 URL")
     verified: Optional[bool] = Field(None, description="Tavily로 검증 여부")
 
 
 # 출처 기반 모순 분석 스키마 (새 구조)
 class SourceBasedContradiction(BaseModel):
-    original_claim: str = Field(..., description="거장이 말한 원본 주장")
-    original_source: str = Field(..., description="원본 출처 (년도, 매체)")
+    original_claim: Optional[str] = Field(None, description="거장이 말한 원본 주장")
+    original_source: Optional[str] = Field(None, description="원본 출처 (년도, 매체)")
     original_source_url: Optional[str] = Field(None, description="원본 출처 URL")
-    counterexample: str = Field(..., description="실제 데이터/사례로 반박")
-    counterexample_source: str = Field(..., description="반례 출처")
+    counterexample: Optional[str] = Field(None, description="실제 데이터/사례로 반박")
+    counterexample_source: Optional[str] = Field(None, description="반례 출처")
     counterexample_source_url: Optional[str] = Field(None, description="반례 출처 URL")
-    hidden_condition: str = Field(..., description="전략 성립에 필요한 숨겨진 조건")
-    hidden_condition_source: str = Field(..., description="조건 출처")
+    hidden_condition: Optional[str] = Field(None, description="전략 성립에 필요한 숨겨진 조건")
+    hidden_condition_source: Optional[str] = Field(None, description="조건 출처")
     hidden_condition_source_url: Optional[str] = Field(None, description="조건 출처 URL")
-    conclusion: str = Field(..., description="왜 일반인에게 적용 어려운지")
+    conclusion: Optional[str] = Field(None, description="왜 일반인에게 적용 어려운지")
 
 
 # 콘텐츠 방향 스키마 (기존 호환용 - deprecated)
@@ -96,11 +96,11 @@ class CriticalContentDirection(BaseModel):
 
 # 출처 추적 스키마
 class SourceTracking(BaseModel):
-    quote: str = Field(..., description="인용 문장")
-    source_title: str = Field(..., description="출처 제목")
-    source_type: str = Field(..., description="출처 유형 (책/인터뷰 영상/기사/주주서한/논문/보고서/출처 확인 필요)")
+    quote: Optional[str] = Field(None, description="인용 문장")
+    source_title: Optional[str] = Field(None, description="출처 제목")
+    source_type: Optional[str] = Field(None, description="출처 유형 (책/인터뷰 영상/기사/주주서한/논문/보고서/출처 확인 필요)")
     source_url: Optional[str] = Field(None, description="출처 URL")
-    reliability: int = Field(default=1, description="신뢰도 (1~5)")
+    reliability: Optional[int] = Field(1, description="신뢰도 (1~5)")
     search_keywords: List[str] = Field(default_factory=list, description="검색 키워드 제안")
 
 
@@ -114,16 +114,16 @@ class VideoStructureItem(BaseModel):
 
 # 자동화 관점 인사이트 스키마
 class ProblemSolutionItem(BaseModel):
-    problem: str = Field(..., description="문제점 (현실적 모순에서 추출)")
-    human_difficulty: str = Field(..., description="사람이 힘든 이유 (숨겨진 전제에서)")
-    automation_solution: str = Field(..., description="자동화 해결책")
-    implementation: str = Field(..., description="구현 방법 (지표, API, 코드 등)")
+    problem: Optional[str] = Field(None, description="문제점 (현실적 모순에서 추출)")
+    human_difficulty: Optional[str] = Field(None, description="사람이 힘든 이유 (숨겨진 전제에서)")
+    automation_solution: Optional[str] = Field(None, description="자동화 해결책")
+    implementation: Optional[str] = Field(None, description="구현 방법 (지표, API, 코드 등)")
 
 
 class LifeExpansionExample(BaseModel):
-    area: str = Field(..., description="적용 영역")
-    principle: str = Field(..., description="투자에서 추출한 원리")
-    application: str = Field(..., description="구체적 적용 방법")
+    area: Optional[str] = Field(None, description="적용 영역")
+    principle: Optional[str] = Field(None, description="투자에서 추출한 원리")
+    application: Optional[str] = Field(None, description="구체적 적용 방법")
 
 
 class LifeExpansion(BaseModel):
@@ -133,10 +133,10 @@ class LifeExpansion(BaseModel):
 
 
 class AutomationInsight(BaseModel):
-    video_type: str = Field(..., description="영상 유형 (매매 기법/가치 투자/심리/리스크)")
+    video_type: Optional[str] = Field(None, description="영상 유형 (매매 기법/가치 투자/심리/리스크)")
     video_type_reason: Optional[str] = Field(None, description="유형 판단 이유")
     problem_solution_table: List[ProblemSolutionItem] = Field(default_factory=list, description="문제-해결책 테이블")
-    core_insight: str = Field(..., description="핵심 인사이트 한 문장")
+    core_insight: Optional[str] = Field(None, description="핵심 인사이트 한 문장")
     life_expansion: Optional[LifeExpansion] = Field(None, description="삶의 영역 확장 가능성")
 
 
@@ -208,7 +208,7 @@ class SuitabilityAnalysis(BaseModel):
 # 인용문 스키마 (새 구조)
 class Quote(BaseModel):
     text: str = Field(..., description="인용 원문")
-    speaker: str = Field(..., description="발언자")
+    speaker: Optional[str] = Field(None, description="발언자")
 
 
 # 관점 정보 스키마

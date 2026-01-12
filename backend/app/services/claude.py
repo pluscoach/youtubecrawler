@@ -323,10 +323,21 @@ async def analyze_critical_v2(
                 "contradiction_analyses": [],  # deprecated
             }
 
-            # DEBUG: automation_insight 확인
+            # DEBUG: automation_insight 상세 확인
             print(f"[DEBUG] Claude 응답에서 automation_insight 존재: {'automation_insight' in analysis_result}")
             if analysis_result.get("automation_insight"):
-                print(f"[DEBUG] automation_insight keys: {analysis_result.get('automation_insight').keys()}")
+                ai = analysis_result.get('automation_insight')
+                print(f"[DEBUG] automation_insight keys: {ai.keys()}")
+                print(f"[DEBUG] ├─ improvement_cases 개수: {len(ai.get('improvement_cases', []))}")
+                print(f"[DEBUG] ├─ differentiation_points 개수: {len(ai.get('differentiation_points', []))}")
+                print(f"[DEBUG] ├─ individual_cases 개수: {len(ai.get('individual_cases', []))}")
+                print(f"[DEBUG] ├─ execution_guide 개수: {len(ai.get('execution_guide', []))}")
+                # improvement_cases source_link 확인
+                for i, ic in enumerate(ai.get('improvement_cases', [])):
+                    print(f"[DEBUG] │  improvement_cases[{i}] source_link: {ic.get('source_link', 'MISSING')}")
+                # differentiation_points type 확인
+                for i, dp in enumerate(ai.get('differentiation_points', [])):
+                    print(f"[DEBUG] │  differentiation_points[{i}] type: {dp.get('type', 'MISSING')}")
 
             return normalized_result, None
 

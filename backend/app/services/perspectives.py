@@ -231,47 +231,52 @@ CRITICAL_ANALYSIS_PROMPT = """너는 투자 철학 비평가야. 감정적 비�
         "improvement_cases": [
             {{
                 "original_limitation": "원본 영상/전략의 한계점",
-                "improver": "보완한 사람/연구자 (예: 조엘 그린블라트)",
-                "method": "보완 방법 (예: 마법공식 - ROC+EY 정량화)",
-                "verified_result": "검증된 결과 (예: 연 24%)",
-                "verification_period": "검증 기간 (예: 1988-2009)",
-                "source_link": "출처 링크 (책 제목 + 논문/연구 링크)"
+                "improver": "조엘 그린블라트",
+                "method": "마법공식 - ROC+EY 정량화",
+                "verified_result": "연평균 24%",
+                "verification_period": "1988-2009",
+                "source_link": "https://www.magicformulainvesting.com"
+            }},
+            {{
+                "original_limitation": "감정 통제 필요",
+                "improver": "레이 달리오",
+                "method": "올웨더 포트폴리오 - 자산배분 리밸런싱",
+                "verified_result": "연평균 9.5%",
+                "verification_period": "1984-2013",
+                "source_link": "https://www.bridgewater.com/research-and-insights/the-all-weather-story"
             }}
         ],
         "individual_cases": [
             {{
-                "strategy": "적용 전략명",
-                "applier": "적용자 (블로거 A, 유튜버 B 등)",
-                "period": "적용 기간 (예: 3년)",
-                "result": "결과 (예: 연 18%)",
-                "feedback": "느낀 점 (예: 감정 개입 줄었다)",
-                "source_link": "출처 링크"
+                "strategy": "마법공식/퀀트 가치투자",
+                "applier": "국내 개인투자자",
+                "period": "2-3년",
+                "result": "KOSPI 대비 초과수익",
+                "feedback": "감정 개입 줄고 규칙적 매매 가능",
+                "source_link": "https://www.google.com/search?q=마법공식+투자+후기"
             }}
         ],
         "execution_guide": [
-            {{
-                "step": 1,
-                "task": "할 일 설명",
-                "duration": "소요 시간 (예: 30분)",
-                "difficulty": "쉬움|중간|어려움",
-                "tool": "필요 도구 (예: 엑셀 or HTS)"
-            }}
+            {{"step": 1, "task": "투자 조건 정리", "duration": "30분", "difficulty": "쉬움", "tool": "엑셀"}},
+            {{"step": 2, "task": "HTS 조건검색 설정", "duration": "20분", "difficulty": "쉬움", "tool": "키움HTS"}},
+            {{"step": 3, "task": "알림 설정", "duration": "10분", "difficulty": "쉬움", "tool": "HTS"}},
+            {{"step": 4, "task": "리밸런싱 일정 등록", "duration": "5분", "difficulty": "쉬움", "tool": "캘린더"}}
         ],
         "differentiation_points": [
             {{
                 "type": "정량화 성공",
-                "summary": "복잡한 분석을 단순화한 사례",
-                "quote_template": "버핏의 복잡한 분석을 [누가] [어떻게] 단순화했고, [결과]가 검증됐다."
+                "summary": "버핏의 주관적 분석을 그린블라트가 마법공식으로 정량화",
+                "quote_template": "버핏은 복잡한 기업분석을 말했지만, 그린블라트가 이걸 마법공식으로 정량화했습니다. 실제로 1988-2009년 연 24%가 검증됐어요."
             }},
             {{
                 "type": "감정 배제 성공",
-                "summary": "감정을 배제한 사례",
-                "quote_template": "[누가] [방법]으로 감정을 배제했고, [결과]를 달성했다."
+                "summary": "감정적 판단을 달리오가 올웨더로 시스템화",
+                "quote_template": "버핏은 공포에 매수를 요구했지만, 달리오가 올웨더 포트폴리오로 감정을 배제했습니다. 실제로 30년간 연 9.5%를 달성했어요."
             }},
             {{
                 "type": "개인 적용 가능성",
-                "summary": "개인 투자자가 실제 적용한 사례",
-                "quote_template": "실제로 [누가] 적용해서 [결과]를 냈다. 우리도 할 수 있다."
+                "summary": "일반인도 HTS만 있으면 30분 안에 시작 가능",
+                "quote_template": "이 전략은 키움HTS만 있으면 30분 안에 누구나 시작할 수 있습니다. 전문가만 되는 게 아닙니다."
             }}
         ],
         "improvement_search_failed": false,
@@ -290,6 +295,14 @@ CRITICAL_ANALYSIS_PROMPT = """너는 투자 철학 비평가야. 감정적 비�
 5. 반드시 유효한 JSON 형식으로만 응답
 6. 다른 텍스트 없이 JSON만 출력
 7. 한국어로 분석
+
+★★★ 절대 생략 금지 필드 (automation_insight 내부) ★★★
+다음 4개 필드는 반드시 출력해야 합니다. 생략하면 안 됩니다!
+
+8. improvement_cases: 반드시 2개 이상 출력 (source_link에 실제 URL 필수)
+9. individual_cases: 반드시 1개 이상 출력
+10. execution_guide: 반드시 4개 이상 출력
+11. differentiation_points: 반드시 정확히 3개 출력 (정량화 성공, 감정 배제 성공, 개인 적용 가능성)
 
 [자동매매 연결 작성 시 주의]
 

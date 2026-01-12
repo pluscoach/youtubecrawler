@@ -401,6 +401,71 @@ def search_source_by_type(source_name: str, source_type: str, context: str = "")
     }
 
 
+def search_individual_cases(strategy_name: str) -> List[Dict]:
+    """
+    개인 투자자 적용 사례 검색
+
+    Args:
+        strategy_name: 전략 이름 (예: "마법공식", "가치투자", "모멘텀 전략")
+
+    Returns:
+        개인 투자자 적용 사례 리스트
+        [{
+            "strategy": "전략명",
+            "title": "제목",
+            "url": "URL",
+            "snippet": "요약",
+            "found": True/False
+        }]
+    """
+    global tavily_client
+
+    if not tavily_client:
+        init_tavily()
+
+    if not tavily_client:
+        return []
+
+    results = []
+
+    # 검색 쿼리 템플릿
+    queries = [
+        f"{strategy_name} 개인 투자자 후기",
+        f"{strategy_name} 실제 적용 결과 블로그",
+        f"{strategy_name} 투자 후기 수익률",
+        f"{strategy_name} individual investor results",
+    ]
+
+    for query in queries[:3]:  # 최대 3개 쿼리
+        try:
+            print(f"[Tavily] Searching individual cases: {query}")
+            response = tavily_client.search(
+                query=query,
+                search_depth="basic",
+                max_results=2
+            )
+
+            if response.get("results") and len(response["results"]) > 0:
+                for result in response["results"]:
+                    url = result.get("url", "")
+                    # 중복 URL 제거
+                    if url and not any(r.get("url") == url for r in results):
+                        results.append({
+                            "strategy": strategy_name,
+                            "title": result.get("title", ""),
+                            "url": url,
+                            "snippet": result.get("content", "")[:300] if result.get("content") else "",
+                            "found": True
+                        })
+                        print(f"[Tavily] Found individual case: {result.get('title', '')[:50]}")
+        except Exception as e:
+            print(f"[Tavily] Individual case search error for '{query}': {e}")
+            continue
+
+    print(f"[Tavily] Total individual cases found: {len(results)}")
+    return results[:4]  # 최대 4개 결과 반환
+
+
 def search_improvement_cases(master_name: str, problems: List[str] = None) -> List[Dict]:
     """
     거장의 전략을 보완/업그레이드한 실제 사례 검색

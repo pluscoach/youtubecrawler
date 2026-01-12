@@ -113,11 +113,41 @@ class VideoStructureItem(BaseModel):
 
 
 # 자동화 관점 인사이트 스키마
+
+# 구현 상세 스키마
+class ImplementationDetail(BaseModel):
+    condition: Optional[str] = Field(None, description="구체적 조건 (예: PER < 15, ROE > 15%)")
+    tool: Optional[str] = Field(None, description="사용 도구 (예: 키움 HTS, Python FinanceDataReader)")
+    backtest_result: Optional[str] = Field(None, description="백테스트 결과 (예: 2010-2024 연 12%, MDD 18%)")
+    caution: Optional[str] = Field(None, description="주의사항/한계점")
+
+
+# 개인 투자자 적용 사례 스키마
+class IndividualCase(BaseModel):
+    strategy: Optional[str] = Field(None, description="적용 전략")
+    applier: Optional[str] = Field(None, description="적용자 (블로거 A, 유튜버 B 등)")
+    period: Optional[str] = Field(None, description="적용 기간")
+    result: Optional[str] = Field(None, description="결과")
+    feedback: Optional[str] = Field(None, description="느낀 점/후기")
+    source_link: Optional[str] = Field(None, description="출처 링크")
+
+
+# 실행 가이드 단계 스키마
+class ExecutionStep(BaseModel):
+    step: int = Field(..., description="단계 번호")
+    task: Optional[str] = Field(None, description="할 일")
+    duration: Optional[str] = Field(None, description="소요 시간")
+    difficulty: Optional[str] = Field(None, description="난이도 (쉬움/중간/어려움)")
+    tool: Optional[str] = Field(None, description="필요 도구")
+
+
 class ProblemSolutionItem(BaseModel):
     problem: Optional[str] = Field(None, description="문제점 (현실적 모순에서 추출)")
     human_difficulty: Optional[str] = Field(None, description="사람이 힘든 이유 (숨겨진 전제에서)")
     automation_solution: Optional[str] = Field(None, description="자동화 해결책")
     implementation: Optional[str] = Field(None, description="구현 방법 (지표, API, 코드 등)")
+    # 구현 상세 추가
+    implementation_detail: Optional[ImplementationDetail] = Field(None, description="구현 상세 정보")
 
 
 class LifeExpansionExample(BaseModel):
@@ -138,11 +168,13 @@ class ImprovementCase(BaseModel):
     improver: Optional[str] = Field(None, description="보완한 사람/연구")
     method: Optional[str] = Field(None, description="보완 방법")
     verified_result: Optional[str] = Field(None, description="검증된 결과")
+    verification_period: Optional[str] = Field(None, description="검증 기간 (예: 1988-2009)")
     source_link: Optional[str] = Field(None, description="출처 링크")
 
 
 # 차별화 포인트 스키마
 class DifferentiationPoint(BaseModel):
+    type: Optional[str] = Field(None, description="유형 (정량화 성공/감정 배제 성공/개인 적용 가능성)")
     summary: Optional[str] = Field(None, description="차별화 요약")
     quote_template: Optional[str] = Field(None, description="인용 템플릿 (예: 버핏은 이렇게 말했지만, [누구]는...)")
 
@@ -153,11 +185,14 @@ class AutomationInsight(BaseModel):
     problem_solution_table: List[ProblemSolutionItem] = Field(default_factory=list, description="문제-해결책 테이블")
     core_insight: Optional[str] = Field(None, description="핵심 인사이트 한 문장")
     life_expansion: Optional[LifeExpansion] = Field(None, description="삶의 영역 확장 가능성")
-    # 보완 사례 관련 필드 추가
+    # 보완 사례 관련 필드
     improvement_cases: List[ImprovementCase] = Field(default_factory=list, description="실제 보완/업그레이드 사례")
-    differentiation_points: List[DifferentiationPoint] = Field(default_factory=list, description="영상 차별화 포인트")
+    differentiation_points: List[DifferentiationPoint] = Field(default_factory=list, description="영상 차별화 포인트 (최소 3개)")
     improvement_search_failed: bool = Field(default=False, description="보완 사례 검색 실패 여부")
     suggested_search_keywords: List[str] = Field(default_factory=list, description="검색 키워드 제안")
+    # 강화된 필드 추가
+    individual_cases: List[IndividualCase] = Field(default_factory=list, description="개인 투자자 적용 사례")
+    execution_guide: List[ExecutionStep] = Field(default_factory=list, description="단계별 실행 가이드")
 
 
 # 모순 분석 출처 항목 스키마

@@ -94,11 +94,40 @@ export interface HookingPoint {
 }
 
 // 자동화 관점 인사이트
+
+// 구현 상세 타입
+export interface ImplementationDetail {
+  condition?: string;
+  tool?: string;
+  backtest_result?: string;
+  caution?: string;
+}
+
+// 개인 투자자 적용 사례 타입
+export interface IndividualCase {
+  strategy?: string;
+  applier?: string;
+  period?: string;
+  result?: string;
+  feedback?: string;
+  source_link?: string;
+}
+
+// 실행 가이드 단계 타입
+export interface ExecutionStep {
+  step: number;
+  task?: string;
+  duration?: string;
+  difficulty?: string;
+  tool?: string;
+}
+
 export interface ProblemSolutionItem {
   problem: string;
   human_difficulty: string;
   automation_solution: string;
   implementation: string;
+  implementation_detail?: ImplementationDetail;
 }
 
 export interface LifeExpansionExample {
@@ -119,11 +148,13 @@ export interface ImprovementCase {
   improver?: string;
   method?: string;
   verified_result?: string;
+  verification_period?: string;
   source_link?: string;
 }
 
 // 차별화 포인트 타입
 export interface DifferentiationPoint {
+  type?: string;
   summary?: string;
   quote_template?: string;
 }
@@ -139,6 +170,9 @@ export interface AutomationInsight {
   differentiation_points?: DifferentiationPoint[];
   improvement_search_failed?: boolean;
   suggested_search_keywords?: string[];
+  // 강화된 필드
+  individual_cases?: IndividualCase[];
+  execution_guide?: ExecutionStep[];
 }
 
 export interface ContentDirectionStep {

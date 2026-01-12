@@ -182,10 +182,19 @@ function generateMarkdown(result: AnalysisResult): string {
 
       if (ai.problem_solution_table && ai.problem_solution_table.length > 0) {
         md += `#### 문제-해결책 테이블\n`;
-        md += `| 문제점 | 사람이 힘든 이유 | 자동화 해결책 | 구현 방법 |\n`;
-        md += `|--------|------------------|---------------|----------|\n`;
-        ai.problem_solution_table.forEach((item: any) => {
-          md += `| ${item.problem || '-'} | ${item.human_difficulty || '-'} | ${item.automation_solution || '-'} | ${item.implementation || '-'} |\n`;
+        ai.problem_solution_table.forEach((item: any, i: number) => {
+          md += `\n**${i + 1}. ${item.problem || '-'}**\n`;
+          md += `- 사람이 힘든 이유: ${item.human_difficulty || '-'}\n`;
+          md += `- 자동화 해결책: ${item.automation_solution || '-'}\n`;
+          md += `- 구현 방법: ${item.implementation || '-'}\n`;
+          if (item.implementation_detail) {
+            const detail = item.implementation_detail;
+            md += `- **구현 상세**:\n`;
+            if (detail.condition) md += `  - 조건: ${detail.condition}\n`;
+            if (detail.tool) md += `  - 도구: ${detail.tool}\n`;
+            if (detail.backtest_result) md += `  - 백테스트: ${detail.backtest_result}\n`;
+            if (detail.caution) md += `  - 주의사항: ${detail.caution}\n`;
+          }
         });
         md += `\n`;
       }
@@ -204,22 +213,48 @@ function generateMarkdown(result: AnalysisResult): string {
       // 보완 사례
       if (ai.improvement_cases && ai.improvement_cases.length > 0) {
         md += `#### 실제 보완/업그레이드 사례\n`;
-        md += `| 원본 한계 | 보완한 사람/연구 | 방법 | 검증 결과 | 출처 |\n`;
-        md += `|-----------|------------------|------|-----------|------|\n`;
+        md += `| 원본 한계 | 보완한 사람 | 방법 | 검증 결과 | 검증 기간 | 출처 |\n`;
+        md += `|-----------|-------------|------|-----------|-----------|------|\n`;
         ai.improvement_cases.forEach((ic: any) => {
           const sourceLink = ic.source_link && ic.source_link.startsWith('http')
             ? `[링크](${ic.source_link})`
             : (ic.source_link || '-');
-          md += `| ${ic.original_limitation || '-'} | ${ic.improver || '-'} | ${ic.method || '-'} | ${ic.verified_result || '-'} | ${sourceLink} |\n`;
+          md += `| ${ic.original_limitation || '-'} | ${ic.improver || '-'} | ${ic.method || '-'} | ${ic.verified_result || '-'} | ${ic.verification_period || '-'} | ${sourceLink} |\n`;
+        });
+        md += `\n`;
+      }
+
+      // 개인 투자자 적용 사례
+      if (ai.individual_cases && ai.individual_cases.length > 0) {
+        md += `#### 개인 투자자 적용 사례\n`;
+        md += `| 전략 | 적용자 | 기간 | 결과 | 느낀 점 | 출처 |\n`;
+        md += `|------|--------|------|------|---------|------|\n`;
+        ai.individual_cases.forEach((ic: any) => {
+          const sourceLink = ic.source_link && ic.source_link.startsWith('http')
+            ? `[링크](${ic.source_link})`
+            : (ic.source_link || '-');
+          md += `| ${ic.strategy || '-'} | ${ic.applier || '-'} | ${ic.period || '-'} | ${ic.result || '-'} | ${ic.feedback || '-'} | ${sourceLink} |\n`;
+        });
+        md += `\n`;
+      }
+
+      // 단계별 실행 가이드
+      if (ai.execution_guide && ai.execution_guide.length > 0) {
+        md += `#### 단계별 실행 가이드\n`;
+        md += `| 단계 | 할 일 | 소요 시간 | 난이도 | 필요 도구 |\n`;
+        md += `|------|-------|-----------|--------|----------|\n`;
+        ai.execution_guide.forEach((step: any) => {
+          md += `| ${step.step} | ${step.task || '-'} | ${step.duration || '-'} | ${step.difficulty || '-'} | ${step.tool || '-'} |\n`;
         });
         md += `\n`;
       }
 
       // 차별화 포인트
       if (ai.differentiation_points && ai.differentiation_points.length > 0) {
-        md += `#### 영상 차별화 포인트\n`;
+        md += `#### 영상 차별화 포인트 (${ai.differentiation_points.length}개)\n`;
         ai.differentiation_points.forEach((dp: any, i: number) => {
-          md += `${i + 1}. **${dp.summary || '-'}**\n`;
+          const typeLabel = dp.type ? `[${dp.type}] ` : '';
+          md += `${i + 1}. ${typeLabel}**${dp.summary || '-'}**\n`;
           if (dp.quote_template) {
             md += `   > "${dp.quote_template}"\n`;
           }

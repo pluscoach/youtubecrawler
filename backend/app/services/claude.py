@@ -228,10 +228,11 @@ async def analyze_critical_v2(
 
         client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
 
-        # Tavily로 보완 사례 검색 (자동매매 관점일 때만)
+        # Tavily로 보완 사례 및 개인 투자자 사례 검색 (자동매매 관점일 때만)
         improvement_search_results = []
+        individual_search_results = []
         if perspective_id == "auto_trading":
-            from .tavily_search import search_improvement_cases
+            from .tavily_search import search_improvement_cases, search_individual_cases
 
             # 등장 인물에서 거장 이름 추출
             master_names = [p.get("name", "") for p in people if p.get("name")]
@@ -254,7 +255,25 @@ async def analyze_critical_v2(
 
             print(f"[Improvement Search] Total results: {len(improvement_search_results)}")
 
-        # 1단계 결과 기반 프롬프트 생성 (보완 사례 검색 결과 포함)
+            # 전략 키워드로 개인 투자자 사례 검색
+            strategy_keywords = ["가치투자", "마법공식", "퀀트", "모멘텀", "올웨더"]
+            if strategy:
+                for keyword in strategy_keywords:
+                    if keyword in strategy:
+                        print(f"[Individual Search] Searching for: {keyword}")
+                        ind_results = search_individual_cases(keyword)
+                        individual_search_results.extend(ind_results)
+                        break
+            # 전략에서 키워드 못 찾으면 거장 이름으로 검색
+            if not individual_search_results and master_names:
+                for master_name in master_names[:1]:
+                    print(f"[Individual Search] Searching with master: {master_name}")
+                    ind_results = search_individual_cases(f"{master_name} 투자법")
+                    individual_search_results.extend(ind_results)
+
+            print(f"[Individual Search] Total results: {len(individual_search_results)}")
+
+        # 1단계 결과 기반 프롬프트 생성 (보완 사례 + 개인 사례 검색 결과 포함)
         prompt = get_critical_analysis_prompt(
             perspective_id=perspective_id,
             summary=summary,
@@ -265,7 +284,8 @@ async def analyze_critical_v2(
             people=people,
             source_tracking=source_tracking,
             suitability_analysis=suitability_analysis,
-            improvement_search_results=improvement_search_results
+            improvement_search_results=improvement_search_results,
+            individual_search_results=individual_search_results
         )
 
         message = client.messages.create(

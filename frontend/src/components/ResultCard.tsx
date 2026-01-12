@@ -27,6 +27,8 @@ import type {
   AutomationInsight,
   ImprovementCase,
   DifferentiationPoint,
+  IndividualCase,
+  ExecutionStep,
 } from '@/lib/api';
 import { analyzeCritical, analyzeAdditional, getPerspectives } from '@/lib/api';
 
@@ -234,27 +236,58 @@ function AutomationInsightSection({ insight }: { insight?: AutomationInsight }) 
       {insight.problem_solution_table && insight.problem_solution_table.length > 0 && (
         <div className="mb-4">
           <h5 className="text-sm font-medium text-text-secondary mb-2">문제 → 자동화 해결책</h5>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-2 px-2 text-text-secondary font-medium">문제점</th>
-                  <th className="text-left py-2 px-2 text-text-secondary font-medium">사람이 힘든 이유</th>
-                  <th className="text-left py-2 px-2 text-text-secondary font-medium">자동화 해결책</th>
-                  <th className="text-left py-2 px-2 text-text-secondary font-medium">구현 방법</th>
-                </tr>
-              </thead>
-              <tbody>
-                {insight.problem_solution_table.map((item, index) => (
-                  <tr key={index} className="border-b border-border/50">
-                    <td className="py-2 px-2 text-red-400">{item.problem}</td>
-                    <td className="py-2 px-2 text-yellow-400">{item.human_difficulty}</td>
-                    <td className="py-2 px-2 text-green-400">{item.automation_solution}</td>
-                    <td className="py-2 px-2 text-cyan-400 font-mono text-xs">{item.implementation}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="space-y-3">
+            {insight.problem_solution_table.map((item, index) => (
+              <div key={index} className="p-3 bg-black/20 rounded-lg border border-border/50">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm mb-2">
+                  <div>
+                    <span className="text-text-secondary text-xs">문제점</span>
+                    <p className="text-red-400">{item.problem}</p>
+                  </div>
+                  <div>
+                    <span className="text-text-secondary text-xs">사람이 힘든 이유</span>
+                    <p className="text-yellow-400">{item.human_difficulty}</p>
+                  </div>
+                  <div>
+                    <span className="text-text-secondary text-xs">자동화 해결책</span>
+                    <p className="text-green-400">{item.automation_solution}</p>
+                  </div>
+                  <div>
+                    <span className="text-text-secondary text-xs">구현 방법</span>
+                    <p className="text-cyan-400 font-mono text-xs">{item.implementation}</p>
+                  </div>
+                </div>
+                {/* 구현 상세 */}
+                {item.implementation_detail && (
+                  <div className="mt-2 pt-2 border-t border-border/30 grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                    {item.implementation_detail.condition && (
+                      <div>
+                        <span className="text-text-secondary">📊 조건</span>
+                        <p className="text-blue-400">{item.implementation_detail.condition}</p>
+                      </div>
+                    )}
+                    {item.implementation_detail.tool && (
+                      <div>
+                        <span className="text-text-secondary">🛠️ 도구</span>
+                        <p className="text-purple-400">{item.implementation_detail.tool}</p>
+                      </div>
+                    )}
+                    {item.implementation_detail.backtest_result && (
+                      <div>
+                        <span className="text-text-secondary">📈 백테스트</span>
+                        <p className="text-green-400">{item.implementation_detail.backtest_result}</p>
+                      </div>
+                    )}
+                    {item.implementation_detail.caution && (
+                      <div>
+                        <span className="text-text-secondary">⚠️ 주의</span>
+                        <p className="text-orange-400">{item.implementation_detail.caution}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -301,9 +334,10 @@ function AutomationInsightSection({ insight }: { insight?: AutomationInsight }) 
               <thead>
                 <tr className="border-b border-border">
                   <th className="text-left py-2 px-2 text-text-secondary font-medium">원본 한계</th>
-                  <th className="text-left py-2 px-2 text-text-secondary font-medium">보완한 사람/연구</th>
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">보완한 사람</th>
                   <th className="text-left py-2 px-2 text-text-secondary font-medium">방법</th>
                   <th className="text-left py-2 px-2 text-text-secondary font-medium">검증 결과</th>
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">검증 기간</th>
                   <th className="text-left py-2 px-2 text-text-secondary font-medium">출처</th>
                 </tr>
               </thead>
@@ -314,6 +348,7 @@ function AutomationInsightSection({ insight }: { insight?: AutomationInsight }) 
                     <td className="py-2 px-2 text-blue-400">{item.improver || '-'}</td>
                     <td className="py-2 px-2 text-green-400">{item.method || '-'}</td>
                     <td className="py-2 px-2 text-yellow-400">{item.verified_result || '-'}</td>
+                    <td className="py-2 px-2 text-purple-400">{item.verification_period || '-'}</td>
                     <td className="py-2 px-2">
                       {item.source_link && item.source_link.startsWith('http') ? (
                         <a href={item.source_link} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
@@ -331,13 +366,103 @@ function AutomationInsightSection({ insight }: { insight?: AutomationInsight }) 
         </div>
       )}
 
+      {/* 개인 투자자 적용 사례 */}
+      {insight.individual_cases && insight.individual_cases.length > 0 && (
+        <div className="mt-4">
+          <h5 className="text-sm font-medium text-text-secondary mb-2">👤 개인 투자자 적용 사례</h5>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">전략</th>
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">적용자</th>
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">기간</th>
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">결과</th>
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">느낀 점</th>
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">출처</th>
+                </tr>
+              </thead>
+              <tbody>
+                {insight.individual_cases.map((item, index) => (
+                  <tr key={index} className="border-b border-border/50">
+                    <td className="py-2 px-2 text-cyan-400">{item.strategy || '-'}</td>
+                    <td className="py-2 px-2 text-blue-400">{item.applier || '-'}</td>
+                    <td className="py-2 px-2 text-text-primary">{item.period || '-'}</td>
+                    <td className="py-2 px-2 text-green-400">{item.result || '-'}</td>
+                    <td className="py-2 px-2 text-yellow-400 text-xs">{item.feedback || '-'}</td>
+                    <td className="py-2 px-2">
+                      {item.source_link && item.source_link.startsWith('http') ? (
+                        <a href={item.source_link} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+                          🔗 링크
+                        </a>
+                      ) : (
+                        <span className="text-text-secondary">{item.source_link || '-'}</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* 단계별 실행 가이드 */}
+      {insight.execution_guide && insight.execution_guide.length > 0 && (
+        <div className="mt-4">
+          <h5 className="text-sm font-medium text-text-secondary mb-2">📋 단계별 실행 가이드</h5>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">단계</th>
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">할 일</th>
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">소요 시간</th>
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">난이도</th>
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">필요 도구</th>
+                </tr>
+              </thead>
+              <tbody>
+                {insight.execution_guide.map((item, index) => (
+                  <tr key={index} className="border-b border-border/50">
+                    <td className="py-2 px-2 text-accent font-bold">{item.step}</td>
+                    <td className="py-2 px-2 text-text-primary">{item.task || '-'}</td>
+                    <td className="py-2 px-2 text-cyan-400">{item.duration || '-'}</td>
+                    <td className="py-2 px-2">
+                      <span className={`px-2 py-0.5 rounded text-xs ${
+                        item.difficulty === '쉬움' ? 'bg-green-500/20 text-green-400' :
+                        item.difficulty === '중간' ? 'bg-yellow-500/20 text-yellow-400' :
+                        'bg-red-500/20 text-red-400'
+                      }`}>
+                        {item.difficulty || '-'}
+                      </span>
+                    </td>
+                    <td className="py-2 px-2 text-purple-400 text-xs">{item.tool || '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {/* 차별화 포인트 */}
       {insight.differentiation_points && insight.differentiation_points.length > 0 && (
         <div className="mt-4">
-          <h5 className="text-sm font-medium text-text-secondary mb-2">💡 영상 차별화 포인트</h5>
+          <h5 className="text-sm font-medium text-text-secondary mb-2">💡 영상 차별화 포인트 ({insight.differentiation_points.length}개)</h5>
           <div className="space-y-3">
             {insight.differentiation_points.map((point, index) => (
               <div key={index} className="p-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-lg">
+                {point.type && (
+                  <span className={`inline-block px-2 py-0.5 rounded text-xs mb-2 ${
+                    point.type === '정량화 성공' ? 'bg-blue-500/20 text-blue-400' :
+                    point.type === '감정 배제 성공' ? 'bg-green-500/20 text-green-400' :
+                    point.type === '개인 적용 가능성' ? 'bg-yellow-500/20 text-yellow-400' :
+                    'bg-purple-500/20 text-purple-400'
+                  }`}>
+                    {point.type}
+                  </span>
+                )}
                 {point.summary && (
                   <p className="text-text-primary font-medium mb-2">{point.summary}</p>
                 )}

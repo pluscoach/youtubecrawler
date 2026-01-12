@@ -207,7 +207,13 @@ CRITICAL_ANALYSIS_PROMPT = """너는 투자 철학 비평가야. 감정적 비�
                 "problem": "현실적 모순에서 추출한 문제점",
                 "human_difficulty": "사람이 힘든 이유 (숨겨진 전제에서)",
                 "automation_solution": "자동화 해결책 (기술적)",
-                "implementation": "실제 구현 예시 (지표, 도구, 코드 등)"
+                "implementation": "간단 요약",
+                "implementation_detail": {{
+                    "condition": "구체적 조건 (예: PER < 15, ROE > 15%, -10% 손절)",
+                    "tool": "사용 도구 (예: 키움 HTS 조건검색, Python FinanceDataReader, 엑셀)",
+                    "backtest_result": "백테스트 결과 (예: 2010-2024 적용 시 연 12%, MDD 18%)",
+                    "caution": "주의사항/한계 (예: 급등주엔 부적합, 거래량 적은 종목 제외 필요)"
+                }}
             }}
         ],
         "core_insight": "한 문장 요약: 이 전략은 [전제]를 가정하는데, 사람이 직접 하기엔 [한계]가 있다. → [자동화 방법]을 적용하면 실행 가능해진다.",
@@ -227,14 +233,45 @@ CRITICAL_ANALYSIS_PROMPT = """너는 투자 철학 비평가야. 감정적 비�
                 "original_limitation": "원본 영상/전략의 한계점",
                 "improver": "보완한 사람/연구자 (예: 조엘 그린블라트)",
                 "method": "보완 방법 (예: 마법공식 - ROC+EY 정량화)",
-                "verified_result": "검증된 결과 (예: 연 30% 수익률, 1988-2009)",
-                "source_link": "출처 링크 또는 null"
+                "verified_result": "검증된 결과 (예: 연 24%)",
+                "verification_period": "검증 기간 (예: 1988-2009)",
+                "source_link": "출처 링크 (책 제목 + 논문/연구 링크)"
+            }}
+        ],
+        "individual_cases": [
+            {{
+                "strategy": "적용 전략명",
+                "applier": "적용자 (블로거 A, 유튜버 B 등)",
+                "period": "적용 기간 (예: 3년)",
+                "result": "결과 (예: 연 18%)",
+                "feedback": "느낀 점 (예: 감정 개입 줄었다)",
+                "source_link": "출처 링크"
+            }}
+        ],
+        "execution_guide": [
+            {{
+                "step": 1,
+                "task": "할 일 설명",
+                "duration": "소요 시간 (예: 30분)",
+                "difficulty": "쉬움|중간|어려움",
+                "tool": "필요 도구 (예: 엑셀 or HTS)"
             }}
         ],
         "differentiation_points": [
             {{
-                "summary": "차별화 요약",
-                "quote_template": "버핏은 이렇게 말했지만, [누구]는 이걸 [어떻게] 바꿨습니다. 실제로 [결과]가 검증됐어요."
+                "type": "정량화 성공",
+                "summary": "복잡한 분석을 단순화한 사례",
+                "quote_template": "버핏의 복잡한 분석을 [누가] [어떻게] 단순화했고, [결과]가 검증됐다."
+            }},
+            {{
+                "type": "감정 배제 성공",
+                "summary": "감정을 배제한 사례",
+                "quote_template": "[누가] [방법]으로 감정을 배제했고, [결과]를 달성했다."
+            }},
+            {{
+                "type": "개인 적용 가능성",
+                "summary": "개인 투자자가 실제 적용한 사례",
+                "quote_template": "실제로 [누가] 적용해서 [결과]를 냈다. 우리도 할 수 있다."
             }}
         ],
         "improvement_search_failed": false,
@@ -277,15 +314,19 @@ CRITICAL_ANALYSIS_PROMPT = """너는 투자 철학 비평가야. 감정적 비�
    - 심리/멘탈: 감정 통제, 인내 → 강제 룰/차단 시스템
    - 리스크 관리: 자금 관리, 분산 → 포지션/비중 자동 조절
 
-2. problem_solution_table 작성 규칙:
+2. problem_solution_table 작성 규칙 [필수]:
    - problem: 현실적 모순(realistic_contradictions)에서 추출
    - human_difficulty: 숨겨진 전제(hidden_premises)에서 추출
    - automation_solution: 기술적으로 해결 가능한 방법
-   - implementation: 구체적 구현 예시 (지표명, API명, 코드 패턴 등)
-   - 예시:
-     | 공포장에서 매수 못함 | 감정이 판단을 압도 | 조건 충족 시 자동 매수 | VIX 30+ & RSI 30- → 자동 진입 |
-     | 좋은 기업 못 찾음 | 수백 개 재무제표 분석 불가 | 자동 스크리닝 | PER 10- & ROE 15%+ → 리스트 생성 |
-     | 손절 못함 | 손실 회피 편향 | 강제 청산 룰 | -5% 도달 → 자동 종료 |
+   - implementation: 간단 요약
+   - implementation_detail [4가지 모두 필수]:
+     - condition: 구체적 수치 조건 (예: "PER < 15 AND ROE > 15% AND 부채비율 < 100%")
+     - tool: 실제 사용 가능한 도구 (예: "키움HTS 조건검색, 네이버금융 스크리너, Python FinanceDataReader")
+     - backtest_result: 백테스트 결과 (예: "2015-2024 KOSPI 적용 시 연 11%, MDD 22%")
+     - caution: 주의사항 (예: "금융주 제외, 거래량 100만주 이상 필터 필요")
+   - 구체적 예시:
+     | 좋은 기업 찾기 | 수백 개 분석 불가 | 정량 지표 스크리닝 | condition: PER<15 & ROE>15% & 부채비율<100% / tool: 키움HTS 조건검색 / backtest: 2015-2024 연 11% / caution: 금융주 제외 |
+     | 감정적 매매 | 손실회피편향 | 규칙 기반 자동 매도 | condition: -10% 손절, +30% 익절 / tool: 키움HTS 조건주문 / backtest: 2015-2024 승률 62% / caution: 급등주 부적합 |
 
 3. core_insight 형식:
    "이 전략은 [전제]를 가정하는데, 사람이 직접 하기엔 [한계]가 있다.
@@ -296,20 +337,43 @@ CRITICAL_ANALYSIS_PROMPT = """너는 투자 철학 비평가야. 감정적 비�
    - 적용 가능 영역: 습관 관리, 지출 관리, 학습 루틴, 시간 관리 등
    - 구체적 예시 제시
 
-5. improvement_cases (보완 사례) 작성 규칙:
+5. improvement_cases (보완 사례) 작성 규칙 [필수 - 최소 2개]:
    - 원본 영상의 한계를 실제로 보완/업그레이드한 사례를 찾아 작성
-   - 알려진 보완 사례 예시:
-     | 원본 한계 | 보완한 사람/연구 | 방법 | 검증 결과 |
-     | 기업 분석 주관적 | 조엘 그린블라트 | 마법공식 - ROC+EY 정량화 | 연 30% (1988-2009) |
-     | 저평가주 발굴 어려움 | 벤저민 그레이엄 | 순유동자산가치(NCAV) 공식 | 시장대비 초과수익 |
-     | 감정 통제 어려움 | 레이 달리오 | 올웨더 포트폴리오 자동 리밸런싱 | 변동성 대비 수익 안정 |
-   - source_link는 실제 접근 가능한 URL 또는 검색 결과 없으면 null
-   - 보완 사례를 찾을 수 없으면 improvement_cases를 빈 배열로 두고 improvement_search_failed를 true로 설정
+   - verification_period 필드에 검증 기간 명시 필수
+   - source_link 필드에 출처 URL 필수 (책이면 교보문고/예스24 링크, 논문이면 Google Scholar 링크)
+   - 알려진 보완 사례와 출처:
+     | 원본 한계 | 보완한 사람 | 방법 | 검증 결과 | 검증 기간 | 출처 |
+     | 기업 분석 주관적 | 조엘 그린블라트 | 마법공식 ROC+EY | 연 24% | 1988-2009 | magicformulainvesting.com |
+     | 저평가주 발굴 | 벤저민 그레이엄 | NCAV 공식 | 시장+7%p | 1930-1956 | https://www.yes24.com/Product/Goods/145567 |
+     | 감정 통제 | 레이 달리오 | 올웨더 리밸런싱 | 연 9.5% | 1984-2013 | https://www.bridgewater.com/research-and-insights |
+     | 모멘텀 | 게리 안토나치 | 듀얼 모멘텀 | 연 17% | 1974-2013 | https://www.amazon.com/Dual-Momentum-Investing |
+   - 반드시 실제 URL을 source_link에 넣어야 함
 
-6. differentiation_points (차별화 포인트) 작성 규칙:
-   - quote_template 형식: "버핏은 이렇게 말했지만, [누구]는 이걸 [어떻게] 바꿨습니다. 실제로 [결과]가 검증됐어요."
-   - 실제 인물과 검증된 결과를 넣어서 작성
-   - 시청자가 "아, 이런 방법도 있구나"라고 느낄 수 있게 구체적으로 작성
+6. individual_cases (개인 투자자 적용 사례) 작성 규칙 [필수 - 최소 1개]:
+   - Tavily 검색 결과 또는 알려진 사례 활용
+   - 검색 결과 없으면 아래 형식으로 작성:
+     | 전략 | 적용자 | 기간 | 결과 | 느낀 점 | 출처 |
+     | 마법공식 | 국내 개인투자자 | 2-3년 | 시장대비 초과수익 | 감정 개입 줄고 규칙적 매매 가능 | 검색: "마법공식 투자 후기" |
+   - 검색 결과가 있으면 실제 블로그/유튜브 링크 사용
+
+7. execution_guide (단계별 실행 가이드) 작성 규칙 [필수 - 최소 4단계]:
+   - 각 자동화 해결책을 실행하기 위한 구체적 단계
+   - 난이도: 쉬움(30분 이내), 중간(1시간), 어려움(코딩 필요)
+   - 필수 예시:
+     | 단계 | 할 일 | 소요 시간 | 난이도 | 필요 도구 |
+     | 1 | 스크리닝 조건 정리 (엑셀/메모장에 기록) | 30분 | 쉬움 | 엑셀 or 메모장 |
+     | 2 | HTS 조건검색에 등록 | 20분 | 쉬움 | 키움/삼성 HTS |
+     | 3 | 조건 충족 시 알림 설정 | 10분 | 쉬움 | HTS 알림 기능 |
+     | 4 | 월별 리밸런싱 일정 등록 | 5분 | 쉬움 | 캘린더 앱 |
+     | 5 | (선택) 자동매매 API 연동 | 2시간 | 어려움 | Python + 증권사 API |
+
+8. differentiation_points (영상 차별화 포인트) 작성 규칙 [필수 - 정확히 3개]:
+   - 반드시 3개 작성 (정량화 성공 / 감정 배제 성공 / 개인 적용 가능성)
+   - type 유형별 quote_template:
+     1. "정량화 성공": "버핏은 [주관적 방법]을 말했지만, [그린블라트]가 이걸 [마법공식]으로 정량화했습니다. 실제로 [1988-2009년] 연 [24%]가 검증됐어요."
+     2. "감정 배제 성공": "[버핏]은 [공포에 매수]를 요구했지만, [달리오]가 [올웨더 포트폴리오]로 감정을 배제했습니다. 실제로 [30년간] [연 9.5%]를 달성했어요."
+     3. "개인 적용 가능성": "이 전략은 [키움HTS]만 있으면 [30분] 안에 누구나 시작할 수 있습니다. 전문가만 되는 게 아닙니다."
+   - 3번은 검색 결과 없어도 도구+시간으로 작성
 """
 
 
@@ -323,7 +387,8 @@ def get_critical_analysis_prompt(
     people: List[Dict],
     source_tracking: List[Dict],
     suitability_analysis: Dict,
-    improvement_search_results: List[Dict] = None
+    improvement_search_results: List[Dict] = None,
+    individual_search_results: List[Dict] = None
 ) -> str:
     """1단계 결과 기반 비판적 분석 프롬프트 생성"""
     perspective = get_perspective(perspective_id)
@@ -381,8 +446,27 @@ def get_critical_analysis_prompt(
    - URL: {result.get('url', '')}
    - 요약: {result.get('snippet', '')[:200]}...
 """
-        improvement_context += "\n위 검색 결과를 참고하여 improvement_cases와 differentiation_points를 구체적으로 작성하세요."
+        improvement_context += "\n위 검색 결과를 참고하여 improvement_cases와 differentiation_points를 구체적으로 작성하세요. source_link에 반드시 위 URL을 사용하세요."
         prompt += improvement_context
+
+    # Tavily 개인 투자자 사례 검색 결과 추가
+    if individual_search_results and len(individual_search_results) > 0:
+        individual_context = "\n\n[참고: Tavily 웹 검색으로 찾은 개인 투자자 적용 사례]\n"
+        for i, result in enumerate(individual_search_results, 1):
+            individual_context += f"""
+{i}. {result.get('title', '제목 없음')}
+   - URL: {result.get('url', '')}
+   - 내용: {result.get('snippet', '')[:300]}...
+"""
+        individual_context += """
+위 검색 결과를 참고하여 individual_cases를 작성하세요.
+- applier: 블로그/유튜브 작성자 이름 또는 "개인 투자자"
+- period: 글에서 언급된 투자 기간
+- result: 수익률 또는 성과
+- feedback: 후기/느낀점
+- source_link: 반드시 위 URL 사용 [필수]
+"""
+        prompt += individual_context
 
     return prompt
 

@@ -113,12 +113,32 @@ export interface LifeExpansion {
   examples: LifeExpansionExample[];
 }
 
+// 보완 사례 타입
+export interface ImprovementCase {
+  original_limitation?: string;
+  improver?: string;
+  method?: string;
+  verified_result?: string;
+  source_link?: string;
+}
+
+// 차별화 포인트 타입
+export interface DifferentiationPoint {
+  summary?: string;
+  quote_template?: string;
+}
+
 export interface AutomationInsight {
   video_type: string;
   video_type_reason?: string;
   problem_solution_table: ProblemSolutionItem[];
   core_insight: string;
   life_expansion?: LifeExpansion;
+  // 보완 사례 관련 필드
+  improvement_cases?: ImprovementCase[];
+  differentiation_points?: DifferentiationPoint[];
+  improvement_search_failed?: boolean;
+  suggested_search_keywords?: string[];
 }
 
 export interface ContentDirectionStep {

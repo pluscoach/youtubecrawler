@@ -200,6 +200,41 @@ function generateMarkdown(result: AnalysisResult): string {
         }
         md += `\n`;
       }
+
+      // 보완 사례
+      if (ai.improvement_cases && ai.improvement_cases.length > 0) {
+        md += `#### 실제 보완/업그레이드 사례\n`;
+        md += `| 원본 한계 | 보완한 사람/연구 | 방법 | 검증 결과 | 출처 |\n`;
+        md += `|-----------|------------------|------|-----------|------|\n`;
+        ai.improvement_cases.forEach((ic: any) => {
+          const sourceLink = ic.source_link && ic.source_link.startsWith('http')
+            ? `[링크](${ic.source_link})`
+            : (ic.source_link || '-');
+          md += `| ${ic.original_limitation || '-'} | ${ic.improver || '-'} | ${ic.method || '-'} | ${ic.verified_result || '-'} | ${sourceLink} |\n`;
+        });
+        md += `\n`;
+      }
+
+      // 차별화 포인트
+      if (ai.differentiation_points && ai.differentiation_points.length > 0) {
+        md += `#### 영상 차별화 포인트\n`;
+        ai.differentiation_points.forEach((dp: any, i: number) => {
+          md += `${i + 1}. **${dp.summary || '-'}**\n`;
+          if (dp.quote_template) {
+            md += `   > "${dp.quote_template}"\n`;
+          }
+        });
+        md += `\n`;
+      }
+
+      // 검색 실패 시
+      if (ai.improvement_search_failed) {
+        md += `> ⚠️ 보완 사례를 찾지 못했습니다. 직접 리서치가 필요합니다.\n`;
+        if (ai.suggested_search_keywords && ai.suggested_search_keywords.length > 0) {
+          md += `> 검색 키워드 제안: ${ai.suggested_search_keywords.join(', ')}\n`;
+        }
+        md += `\n`;
+      }
     }
 
     // 관점별 인사이트

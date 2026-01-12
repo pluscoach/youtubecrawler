@@ -401,6 +401,105 @@ def search_source_by_type(source_name: str, source_type: str, context: str = "")
     }
 
 
+def search_improvement_cases(master_name: str, problems: List[str] = None) -> List[Dict]:
+    """
+    거장의 전략을 보완/업그레이드한 실제 사례 검색
+
+    Args:
+        master_name: 거장 이름 (예: "워렌 버핏", "찰리 멍거")
+        problems: 문제점 리스트 (예: ["기업 분석 주관적", "감정 통제 필요"])
+
+    Returns:
+        보완 사례 검색 결과 리스트
+        [{
+            "query": "검색 쿼리",
+            "found": True/False,
+            "title": "제목",
+            "url": "URL",
+            "snippet": "요약"
+        }]
+    """
+    global tavily_client
+
+    if not tavily_client:
+        init_tavily()
+
+    if not tavily_client:
+        return []
+
+    results = []
+
+    # 거장 이름 영어 변환 (더 좋은 검색 결과를 위해)
+    english_names = {
+        "워렌 버핏": "Warren Buffett",
+        "워런 버핏": "Warren Buffett",
+        "찰리 멍거": "Charlie Munger",
+        "벤저민 그레이엄": "Benjamin Graham",
+        "피터 린치": "Peter Lynch",
+        "조엘 그린블라트": "Joel Greenblatt",
+        "하워드 막스": "Howard Marks",
+        "레이 달리오": "Ray Dalio",
+        "필립 피셔": "Philip Fisher",
+        "세스 클라만": "Seth Klarman",
+        "존 템플턴": "John Templeton",
+        "조지 소로스": "George Soros",
+    }
+
+    search_name = english_names.get(master_name, master_name)
+
+    # 검색 쿼리 템플릿
+    query_templates = [
+        f"{search_name} 투자 전략 정량화 시스템",
+        f"{search_name} 방법론 백테스트 검증 결과",
+        f"{search_name} strategy quantitative system",
+        f"{search_name} investment backtest results",
+    ]
+
+    # 문제점 기반 쿼리 추가
+    if problems:
+        for problem in problems[:2]:  # 상위 2개 문제점만
+            query_templates.append(f"{problem} 해결 투자 시스템 사례")
+            query_templates.append(f"{problem} 자동화 트레이딩 솔루션")
+
+    # 유명한 보완 사례 직접 검색 (알려진 사례들)
+    improvement_queries = [
+        "조엘 그린블라트 마법공식 Magic Formula ROC EY",
+        "퀀트 가치투자 백테스트 수익률",
+        "rule based value investing backtest",
+        f"{search_name} quantified strategy research",
+    ]
+    query_templates.extend(improvement_queries)
+
+    for query in query_templates[:6]:  # 최대 6개 쿼리
+        try:
+            print(f"[Tavily] Searching improvement case: {query}")
+            response = tavily_client.search(
+                query=query,
+                search_depth="basic",
+                max_results=2
+            )
+
+            if response.get("results") and len(response["results"]) > 0:
+                for result in response["results"]:
+                    url = result.get("url", "")
+                    # 중복 URL 제거
+                    if url and not any(r.get("url") == url for r in results):
+                        results.append({
+                            "query": query,
+                            "found": True,
+                            "title": result.get("title", ""),
+                            "url": url,
+                            "snippet": result.get("content", "")[:300] if result.get("content") else ""
+                        })
+                        print(f"[Tavily] Found: {result.get('title', '')[:50]}")
+        except Exception as e:
+            print(f"[Tavily] Search error for '{query}': {e}")
+            continue
+
+    print(f"[Tavily] Total improvement cases found: {len(results)}")
+    return results[:5]  # 최대 5개 결과 반환
+
+
 async def verify_and_add_links(data: Dict, field_mappings: List[Dict]) -> Dict:
     """
     데이터의 출처 필드들을 검증하고 링크 추가

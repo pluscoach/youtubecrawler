@@ -221,7 +221,24 @@ CRITICAL_ANALYSIS_PROMPT = """너는 투자 철학 비평가야. 감정적 비�
                     "application": "구체적 적용 방법"
                 }}
             ]
-        }}
+        }},
+        "improvement_cases": [
+            {{
+                "original_limitation": "원본 영상/전략의 한계점",
+                "improver": "보완한 사람/연구자 (예: 조엘 그린블라트)",
+                "method": "보완 방법 (예: 마법공식 - ROC+EY 정량화)",
+                "verified_result": "검증된 결과 (예: 연 30% 수익률, 1988-2009)",
+                "source_link": "출처 링크 또는 null"
+            }}
+        ],
+        "differentiation_points": [
+            {{
+                "summary": "차별화 요약",
+                "quote_template": "버핏은 이렇게 말했지만, [누구]는 이걸 [어떻게] 바꿨습니다. 실제로 [결과]가 검증됐어요."
+            }}
+        ],
+        "improvement_search_failed": false,
+        "suggested_search_keywords": ["검색 키워드1", "검색 키워드2"]
     }}
 }}
 
@@ -278,6 +295,21 @@ CRITICAL_ANALYSIS_PROMPT = """너는 투자 철학 비평가야. 감정적 비�
    - 투자 외 삶의 영역에도 동일 원리 적용 가능한지 분석
    - 적용 가능 영역: 습관 관리, 지출 관리, 학습 루틴, 시간 관리 등
    - 구체적 예시 제시
+
+5. improvement_cases (보완 사례) 작성 규칙:
+   - 원본 영상의 한계를 실제로 보완/업그레이드한 사례를 찾아 작성
+   - 알려진 보완 사례 예시:
+     | 원본 한계 | 보완한 사람/연구 | 방법 | 검증 결과 |
+     | 기업 분석 주관적 | 조엘 그린블라트 | 마법공식 - ROC+EY 정량화 | 연 30% (1988-2009) |
+     | 저평가주 발굴 어려움 | 벤저민 그레이엄 | 순유동자산가치(NCAV) 공식 | 시장대비 초과수익 |
+     | 감정 통제 어려움 | 레이 달리오 | 올웨더 포트폴리오 자동 리밸런싱 | 변동성 대비 수익 안정 |
+   - source_link는 실제 접근 가능한 URL 또는 검색 결과 없으면 null
+   - 보완 사례를 찾을 수 없으면 improvement_cases를 빈 배열로 두고 improvement_search_failed를 true로 설정
+
+6. differentiation_points (차별화 포인트) 작성 규칙:
+   - quote_template 형식: "버핏은 이렇게 말했지만, [누구]는 이걸 [어떻게] 바꿨습니다. 실제로 [결과]가 검증됐어요."
+   - 실제 인물과 검증된 결과를 넣어서 작성
+   - 시청자가 "아, 이런 방법도 있구나"라고 느낄 수 있게 구체적으로 작성
 """
 
 
@@ -290,7 +322,8 @@ def get_critical_analysis_prompt(
     quotes: List[Dict],
     people: List[Dict],
     source_tracking: List[Dict],
-    suitability_analysis: Dict
+    suitability_analysis: Dict,
+    improvement_search_results: List[Dict] = None
 ) -> str:
     """1단계 결과 기반 비판적 분석 프롬프트 생성"""
     perspective = get_perspective(perspective_id)
@@ -338,6 +371,18 @@ def get_critical_analysis_prompt(
     # 자동매매 관점일 경우 구현 가능 범위 추가
     if perspective_id == "auto_trading":
         prompt = AUTO_TRADING_SCOPE + "\n\n" + prompt
+
+    # Tavily 보완 사례 검색 결과 추가
+    if improvement_search_results and len(improvement_search_results) > 0:
+        improvement_context = "\n\n[참고: Tavily 웹 검색으로 찾은 보완 사례 자료]\n"
+        for i, result in enumerate(improvement_search_results, 1):
+            improvement_context += f"""
+{i}. {result.get('title', '제목 없음')}
+   - URL: {result.get('url', '')}
+   - 요약: {result.get('snippet', '')[:200]}...
+"""
+        improvement_context += "\n위 검색 결과를 참고하여 improvement_cases와 differentiation_points를 구체적으로 작성하세요."
+        prompt += improvement_context
 
     return prompt
 

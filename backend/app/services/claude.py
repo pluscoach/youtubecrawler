@@ -228,7 +228,33 @@ async def analyze_critical_v2(
 
         client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
 
-        # 1단계 결과 기반 프롬프트 생성
+        # Tavily로 보완 사례 검색 (자동매매 관점일 때만)
+        improvement_search_results = []
+        if perspective_id == "auto_trading":
+            from .tavily_search import search_improvement_cases
+
+            # 등장 인물에서 거장 이름 추출
+            master_names = [p.get("name", "") for p in people if p.get("name")]
+
+            # 소재 적합성에서 문제점 추출
+            problems = []
+            if suitability_analysis:
+                feasibility = suitability_analysis.get('feasibility_issue', {})
+                if feasibility.get('exists') and feasibility.get('content'):
+                    problems.append(feasibility.get('content')[:50])
+                hidden = suitability_analysis.get('hidden_premise', {})
+                if hidden.get('exists') and hidden.get('content'):
+                    problems.append(hidden.get('content')[:50])
+
+            # 각 거장에 대해 보완 사례 검색
+            for master_name in master_names[:2]:  # 최대 2명만
+                print(f"[Improvement Search] Searching for: {master_name}")
+                results = search_improvement_cases(master_name, problems)
+                improvement_search_results.extend(results)
+
+            print(f"[Improvement Search] Total results: {len(improvement_search_results)}")
+
+        # 1단계 결과 기반 프롬프트 생성 (보완 사례 검색 결과 포함)
         prompt = get_critical_analysis_prompt(
             perspective_id=perspective_id,
             summary=summary,
@@ -238,7 +264,8 @@ async def analyze_critical_v2(
             quotes=quotes,
             people=people,
             source_tracking=source_tracking,
-            suitability_analysis=suitability_analysis
+            suitability_analysis=suitability_analysis,
+            improvement_search_results=improvement_search_results
         )
 
         message = client.messages.create(

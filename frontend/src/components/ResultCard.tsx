@@ -25,6 +25,8 @@ import type {
   MembershipConnection,
   VideoStructureItem,
   AutomationInsight,
+  ImprovementCase,
+  DifferentiationPoint,
 } from '@/lib/api';
 import { analyzeCritical, analyzeAdditional, getPerspectives } from '@/lib/api';
 
@@ -285,6 +287,91 @@ function AutomationInsightSection({ insight }: { insight?: AutomationInsight }) 
                   <span className="text-text-primary">{ex.application}</span>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 보완 사례 */}
+      {insight.improvement_cases && insight.improvement_cases.length > 0 && (
+        <div className="mt-4">
+          <h5 className="text-sm font-medium text-text-secondary mb-2">🔬 실제 보완/업그레이드 사례</h5>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">원본 한계</th>
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">보완한 사람/연구</th>
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">방법</th>
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">검증 결과</th>
+                  <th className="text-left py-2 px-2 text-text-secondary font-medium">출처</th>
+                </tr>
+              </thead>
+              <tbody>
+                {insight.improvement_cases.map((item, index) => (
+                  <tr key={index} className="border-b border-border/50">
+                    <td className="py-2 px-2 text-red-400">{item.original_limitation || '-'}</td>
+                    <td className="py-2 px-2 text-blue-400">{item.improver || '-'}</td>
+                    <td className="py-2 px-2 text-green-400">{item.method || '-'}</td>
+                    <td className="py-2 px-2 text-yellow-400">{item.verified_result || '-'}</td>
+                    <td className="py-2 px-2">
+                      {item.source_link && item.source_link.startsWith('http') ? (
+                        <a href={item.source_link} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+                          🔗 링크
+                        </a>
+                      ) : (
+                        <span className="text-text-secondary">{item.source_link || '-'}</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* 차별화 포인트 */}
+      {insight.differentiation_points && insight.differentiation_points.length > 0 && (
+        <div className="mt-4">
+          <h5 className="text-sm font-medium text-text-secondary mb-2">💡 영상 차별화 포인트</h5>
+          <div className="space-y-3">
+            {insight.differentiation_points.map((point, index) => (
+              <div key={index} className="p-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/30 rounded-lg">
+                {point.summary && (
+                  <p className="text-text-primary font-medium mb-2">{point.summary}</p>
+                )}
+                {point.quote_template && (
+                  <p className="text-text-secondary italic text-sm">
+                    &ldquo;{point.quote_template}&rdquo;
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 검색 실패 시 */}
+      {insight.improvement_search_failed && (
+        <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+          <p className="text-yellow-400 text-sm mb-2">⚠️ 보완 사례를 찾지 못했습니다. 직접 리서치가 필요합니다.</p>
+          {insight.suggested_search_keywords && insight.suggested_search_keywords.length > 0 && (
+            <div>
+              <span className="text-text-secondary text-xs">검색 키워드 제안: </span>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {insight.suggested_search_keywords.map((keyword, index) => (
+                  <a
+                    key={index}
+                    href={`https://www.google.com/search?q=${encodeURIComponent(keyword)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2 py-1 bg-border/30 text-text-secondary text-xs rounded hover:bg-accent/20 hover:text-accent transition-colors"
+                  >
+                    🔍 {keyword}
+                  </a>
+                ))}
+              </div>
             </div>
           )}
         </div>

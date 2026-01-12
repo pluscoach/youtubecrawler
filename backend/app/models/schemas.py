@@ -132,12 +132,32 @@ class LifeExpansion(BaseModel):
     examples: List[LifeExpansionExample] = Field(default_factory=list, description="구체적 예시")
 
 
+# 보완 사례 스키마
+class ImprovementCase(BaseModel):
+    original_limitation: Optional[str] = Field(None, description="원본 한계점")
+    improver: Optional[str] = Field(None, description="보완한 사람/연구")
+    method: Optional[str] = Field(None, description="보완 방법")
+    verified_result: Optional[str] = Field(None, description="검증된 결과")
+    source_link: Optional[str] = Field(None, description="출처 링크")
+
+
+# 차별화 포인트 스키마
+class DifferentiationPoint(BaseModel):
+    summary: Optional[str] = Field(None, description="차별화 요약")
+    quote_template: Optional[str] = Field(None, description="인용 템플릿 (예: 버핏은 이렇게 말했지만, [누구]는...)")
+
+
 class AutomationInsight(BaseModel):
     video_type: Optional[str] = Field(None, description="영상 유형 (매매 기법/가치 투자/심리/리스크)")
     video_type_reason: Optional[str] = Field(None, description="유형 판단 이유")
     problem_solution_table: List[ProblemSolutionItem] = Field(default_factory=list, description="문제-해결책 테이블")
     core_insight: Optional[str] = Field(None, description="핵심 인사이트 한 문장")
     life_expansion: Optional[LifeExpansion] = Field(None, description="삶의 영역 확장 가능성")
+    # 보완 사례 관련 필드 추가
+    improvement_cases: List[ImprovementCase] = Field(default_factory=list, description="실제 보완/업그레이드 사례")
+    differentiation_points: List[DifferentiationPoint] = Field(default_factory=list, description="영상 차별화 포인트")
+    improvement_search_failed: bool = Field(default=False, description="보완 사례 검색 실패 여부")
+    suggested_search_keywords: List[str] = Field(default_factory=list, description="검색 키워드 제안")
 
 
 # 모순 분석 출처 항목 스키마

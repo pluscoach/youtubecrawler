@@ -162,14 +162,13 @@ class LifeExpansion(BaseModel):
     examples: List[LifeExpansionExample] = Field(default_factory=list, description="구체적 예시")
 
 
-# 보완 사례 스키마
+# 보완 사례 스키마 (source_link 제거됨 - Gemini가 대본 작성 시 출처 검증)
 class ImprovementCase(BaseModel):
     original_limitation: Optional[str] = Field(None, description="원본 한계점")
     improver: Optional[str] = Field(None, description="보완한 사람/연구")
     method: Optional[str] = Field(None, description="보완 방법")
     verified_result: Optional[str] = Field(None, description="검증된 결과")
     verification_period: Optional[str] = Field(None, description="검증 기간 (예: 1988-2009)")
-    source_link: Optional[str] = Field(None, description="출처 링크")
 
 
 # 차별화 포인트 스키마
@@ -190,9 +189,6 @@ class AutomationInsight(BaseModel):
     differentiation_points: List[DifferentiationPoint] = Field(default_factory=list, description="영상 차별화 포인트 (최소 3개)")
     improvement_search_failed: bool = Field(default=False, description="보완 사례 검색 실패 여부")
     suggested_search_keywords: List[str] = Field(default_factory=list, description="검색 키워드 제안")
-    # 강화된 필드 추가
-    individual_cases: List[IndividualCase] = Field(default_factory=list, description="개인 투자자 적용 사례")
-    execution_guide: List[ExecutionStep] = Field(default_factory=list, description="단계별 실행 가이드")
 
 
 # 모순 분석 출처 항목 스키마

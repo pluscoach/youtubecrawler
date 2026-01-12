@@ -25,10 +25,7 @@ import type {
   MembershipConnection,
   VideoStructureItem,
   AutomationInsight,
-  ImprovementCase,
   DifferentiationPoint,
-  IndividualCase,
-  ExecutionStep,
 } from '@/lib/api';
 import { analyzeCritical, analyzeAdditional, getPerspectives } from '@/lib/api';
 
@@ -338,7 +335,6 @@ function AutomationInsightSection({ insight }: { insight?: AutomationInsight }) 
                   <th className="text-left py-2 px-2 text-text-secondary font-medium">방법</th>
                   <th className="text-left py-2 px-2 text-text-secondary font-medium">검증 결과</th>
                   <th className="text-left py-2 px-2 text-text-secondary font-medium">검증 기간</th>
-                  <th className="text-left py-2 px-2 text-text-secondary font-medium">출처</th>
                 </tr>
               </thead>
               <tbody>
@@ -349,95 +345,6 @@ function AutomationInsightSection({ insight }: { insight?: AutomationInsight }) 
                     <td className="py-2 px-2 text-green-400">{item.method || '-'}</td>
                     <td className="py-2 px-2 text-yellow-400">{item.verified_result || '-'}</td>
                     <td className="py-2 px-2 text-purple-400">{item.verification_period || '-'}</td>
-                    <td className="py-2 px-2">
-                      {item.source_link && item.source_link.startsWith('http') ? (
-                        <a href={item.source_link} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
-                          🔗 링크
-                        </a>
-                      ) : (
-                        <span className="text-text-secondary">{item.source_link || '-'}</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* 개인 투자자 적용 사례 */}
-      {insight.individual_cases && insight.individual_cases.length > 0 && (
-        <div className="mt-4">
-          <h5 className="text-sm font-medium text-text-secondary mb-2">👤 개인 투자자 적용 사례</h5>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-2 px-2 text-text-secondary font-medium">전략</th>
-                  <th className="text-left py-2 px-2 text-text-secondary font-medium">적용자</th>
-                  <th className="text-left py-2 px-2 text-text-secondary font-medium">기간</th>
-                  <th className="text-left py-2 px-2 text-text-secondary font-medium">결과</th>
-                  <th className="text-left py-2 px-2 text-text-secondary font-medium">느낀 점</th>
-                  <th className="text-left py-2 px-2 text-text-secondary font-medium">출처</th>
-                </tr>
-              </thead>
-              <tbody>
-                {insight.individual_cases.map((item, index) => (
-                  <tr key={index} className="border-b border-border/50">
-                    <td className="py-2 px-2 text-cyan-400">{item.strategy || '-'}</td>
-                    <td className="py-2 px-2 text-blue-400">{item.applier || '-'}</td>
-                    <td className="py-2 px-2 text-text-primary">{item.period || '-'}</td>
-                    <td className="py-2 px-2 text-green-400">{item.result || '-'}</td>
-                    <td className="py-2 px-2 text-yellow-400 text-xs">{item.feedback || '-'}</td>
-                    <td className="py-2 px-2">
-                      {item.source_link && item.source_link.startsWith('http') ? (
-                        <a href={item.source_link} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
-                          🔗 링크
-                        </a>
-                      ) : (
-                        <span className="text-text-secondary">{item.source_link || '-'}</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* 단계별 실행 가이드 */}
-      {insight.execution_guide && insight.execution_guide.length > 0 && (
-        <div className="mt-4">
-          <h5 className="text-sm font-medium text-text-secondary mb-2">📋 단계별 실행 가이드</h5>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-2 px-2 text-text-secondary font-medium">단계</th>
-                  <th className="text-left py-2 px-2 text-text-secondary font-medium">할 일</th>
-                  <th className="text-left py-2 px-2 text-text-secondary font-medium">소요 시간</th>
-                  <th className="text-left py-2 px-2 text-text-secondary font-medium">난이도</th>
-                  <th className="text-left py-2 px-2 text-text-secondary font-medium">필요 도구</th>
-                </tr>
-              </thead>
-              <tbody>
-                {insight.execution_guide.map((item, index) => (
-                  <tr key={index} className="border-b border-border/50">
-                    <td className="py-2 px-2 text-accent font-bold">{item.step}</td>
-                    <td className="py-2 px-2 text-text-primary">{item.task || '-'}</td>
-                    <td className="py-2 px-2 text-cyan-400">{item.duration || '-'}</td>
-                    <td className="py-2 px-2">
-                      <span className={`px-2 py-0.5 rounded text-xs ${
-                        item.difficulty === '쉬움' ? 'bg-green-500/20 text-green-400' :
-                        item.difficulty === '중간' ? 'bg-yellow-500/20 text-yellow-400' :
-                        'bg-red-500/20 text-red-400'
-                      }`}>
-                        {item.difficulty || '-'}
-                      </span>
-                    </td>
-                    <td className="py-2 px-2 text-purple-400 text-xs">{item.tool || '-'}</td>
                   </tr>
                 ))}
               </tbody>

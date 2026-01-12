@@ -234,33 +234,15 @@ CRITICAL_ANALYSIS_PROMPT = """너는 투자 철학 비평가야. 감정적 비�
                 "improver": "조엘 그린블라트",
                 "method": "마법공식 - ROC+EY 정량화",
                 "verified_result": "연평균 24%",
-                "verification_period": "1988-2009",
-                "source_link": "https://www.magicformulainvesting.com"
+                "verification_period": "1988-2009"
             }},
             {{
                 "original_limitation": "감정 통제 필요",
                 "improver": "레이 달리오",
                 "method": "올웨더 포트폴리오 - 자산배분 리밸런싱",
                 "verified_result": "연평균 9.5%",
-                "verification_period": "1984-2013",
-                "source_link": "https://www.bridgewater.com/research-and-insights/the-all-weather-story"
+                "verification_period": "1984-2013"
             }}
-        ],
-        "individual_cases": [
-            {{
-                "strategy": "마법공식/퀀트 가치투자",
-                "applier": "국내 개인투자자",
-                "period": "2-3년",
-                "result": "KOSPI 대비 초과수익",
-                "feedback": "감정 개입 줄고 규칙적 매매 가능",
-                "source_link": "https://www.google.com/search?q=마법공식+투자+후기"
-            }}
-        ],
-        "execution_guide": [
-            {{"step": 1, "task": "투자 조건 정리", "duration": "30분", "difficulty": "쉬움", "tool": "엑셀"}},
-            {{"step": 2, "task": "HTS 조건검색 설정", "duration": "20분", "difficulty": "쉬움", "tool": "키움HTS"}},
-            {{"step": 3, "task": "알림 설정", "duration": "10분", "difficulty": "쉬움", "tool": "HTS"}},
-            {{"step": 4, "task": "리밸런싱 일정 등록", "duration": "5분", "difficulty": "쉬움", "tool": "캘린더"}}
         ],
         "differentiation_points": [
             {{
@@ -297,12 +279,9 @@ CRITICAL_ANALYSIS_PROMPT = """너는 투자 철학 비평가야. 감정적 비�
 7. 한국어로 분석
 
 ★★★ 절대 생략 금지 필드 (automation_insight 내부) ★★★
-다음 4개 필드는 반드시 출력해야 합니다. 생략하면 안 됩니다!
 
-8. improvement_cases: 반드시 2개 이상 출력 (source_link에 실제 URL 필수)
-9. individual_cases: 반드시 1개 이상 출력
-10. execution_guide: 반드시 4개 이상 출력
-11. differentiation_points: 반드시 정확히 3개 출력 (정량화 성공, 감정 배제 성공, 개인 적용 가능성)
+8. improvement_cases: 반드시 2개 이상 출력
+9. differentiation_points: 반드시 정확히 3개 출력 (정량화 성공, 감정 배제 성공, 개인 적용 가능성)
 
 [자동매매 연결 작성 시 주의]
 
@@ -336,66 +315,14 @@ CRITICAL_ANALYSIS_PROMPT = """너는 투자 철학 비평가야. 감정적 비�
 
 5. improvement_cases [★★★ 필수 - 정확히 2개 ★★★]:
    ⚠️ 절대 생략 금지! 반드시 2개 작성!
-   ⚠️ source_link에 반드시 실제 URL 입력! "--" 또는 빈 값 금지!
 
-   [사용할 수 있는 검증된 보완 사례 목록 - 이 중에서 선택]:
+   [사용할 수 있는 검증된 보완 사례 목록]:
+   - 조엘 그린블라트: 마법공식 ROC+EY 정량화, 연 24%, 1988-2009
+   - 레이 달리오: 올웨더 포트폴리오, 연 9.5%, 1984-2013
+   - 벤저민 그레이엄: NCAV 공식, 시장+7%p, 1930-1956
+   - 게리 안토나치: 듀얼 모멘텀, 연 17%, 1974-2013
 
-   사례1: 조엘 그린블라트 마법공식
-   - original_limitation: "버핏의 기업 분석은 주관적이고 시간이 오래 걸림"
-   - improver: "조엘 그린블라트"
-   - method: "마법공식 - ROC(자본수익률) + EY(이익수익률) 2가지 지표로 정량화"
-   - verified_result: "연평균 24% 수익률"
-   - verification_period: "1988-2009 (21년)"
-   - source_link: "https://www.magicformulainvesting.com"
-
-   사례2: 레이 달리오 올웨더 포트폴리오
-   - original_limitation: "시장 타이밍과 감정 통제가 필요함"
-   - improver: "레이 달리오"
-   - method: "올웨더 포트폴리오 - 자산배분 + 정기 리밸런싱으로 감정 배제"
-   - verified_result: "연평균 9.5% 수익률, MDD 12%"
-   - verification_period: "1984-2013 (30년)"
-   - source_link: "https://www.bridgewater.com/research-and-insights/the-all-weather-story"
-
-   사례3: 벤저민 그레이엄 NCAV
-   - original_limitation: "저평가 기업 발굴이 주관적"
-   - improver: "벤저민 그레이엄"
-   - method: "NCAV(순유동자산가치) 공식으로 저평가 종목 정량 필터링"
-   - verified_result: "시장 대비 +7%p 초과수익"
-   - verification_period: "1930-1956"
-   - source_link: "https://www.yes24.com/Product/Goods/657563"
-
-   사례4: 게리 안토나치 듀얼 모멘텀
-   - original_limitation: "모멘텀 전략의 타이밍 판단이 주관적"
-   - improver: "게리 안토나치"
-   - method: "듀얼 모멘텀 - 상대 모멘텀 + 절대 모멘텀 결합"
-   - verified_result: "연평균 17% 수익률"
-   - verification_period: "1974-2013"
-   - source_link: "https://www.amazon.com/Dual-Momentum-Investing-Gary-Antonacci/dp/0071849440"
-
-6. individual_cases [★★★ 필수 - 최소 1개 ★★★]:
-   ⚠️ 절대 생략 금지! 반드시 1개 이상 작성!
-
-   Tavily 검색 결과가 있으면 그 URL 사용, 없으면 아래 기본 사례 사용:
-   - strategy: "퀀트 가치투자 / 마법공식"
-   - applier: "국내 개인투자자들"
-   - period: "2-3년"
-   - result: "KOSPI 대비 초과수익 달성 사례 다수"
-   - feedback: "감정 개입이 줄고 규칙적 매매가 가능해짐"
-   - source_link: "https://www.google.com/search?q=마법공식+투자+후기+블로그"
-
-7. execution_guide [★★★ 필수 - 정확히 4개 이상 ★★★]:
-   ⚠️ 절대 생략 금지! 반드시 4단계 이상 작성!
-
-   기본 템플릿 (영상 내용에 맞게 수정):
-   [
-     {{"step": 1, "task": "투자 조건 정리 (PER, ROE 등 기준 명확화)", "duration": "30분", "difficulty": "쉬움", "tool": "엑셀 or 메모장"}},
-     {{"step": 2, "task": "HTS/스크리너에서 조건검색 설정", "duration": "20분", "difficulty": "쉬움", "tool": "키움HTS 또는 네이버금융"}},
-     {{"step": 3, "task": "조건 충족 종목 알림 설정", "duration": "10분", "difficulty": "쉬움", "tool": "HTS 알림 기능"}},
-     {{"step": 4, "task": "월별 리밸런싱 일정 캘린더 등록", "duration": "5분", "difficulty": "쉬움", "tool": "구글 캘린더"}},
-     {{"step": 5, "task": "(선택) Python 자동매매 연동", "duration": "2시간", "difficulty": "어려움", "tool": "Python + 증권사 API"}}
-   ]
-
-8. differentiation_points [★★★ 필수 - 정확히 3개 ★★★]:
+6. differentiation_points [★★★ 필수 - 정확히 3개 ★★★]:
    ⚠️ 절대 생략 금지! 반드시 3개 모두 작성!
 
    반드시 아래 3가지 type으로 작성:
@@ -429,8 +356,7 @@ def get_critical_analysis_prompt(
     people: List[Dict],
     source_tracking: List[Dict],
     suitability_analysis: Dict,
-    improvement_search_results: List[Dict] = None,
-    individual_search_results: List[Dict] = None
+    improvement_search_results: List[Dict] = None
 ) -> str:
     """1단계 결과 기반 비판적 분석 프롬프트 생성"""
     perspective = get_perspective(perspective_id)
@@ -488,27 +414,8 @@ def get_critical_analysis_prompt(
    - URL: {result.get('url', '')}
    - 요약: {result.get('snippet', '')[:200]}...
 """
-        improvement_context += "\n위 검색 결과를 참고하여 improvement_cases와 differentiation_points를 구체적으로 작성하세요. source_link에 반드시 위 URL을 사용하세요."
+        improvement_context += "\n위 검색 결과를 참고하여 improvement_cases와 differentiation_points를 구체적으로 작성하세요."
         prompt += improvement_context
-
-    # Tavily 개인 투자자 사례 검색 결과 추가
-    if individual_search_results and len(individual_search_results) > 0:
-        individual_context = "\n\n[참고: Tavily 웹 검색으로 찾은 개인 투자자 적용 사례]\n"
-        for i, result in enumerate(individual_search_results, 1):
-            individual_context += f"""
-{i}. {result.get('title', '제목 없음')}
-   - URL: {result.get('url', '')}
-   - 내용: {result.get('snippet', '')[:300]}...
-"""
-        individual_context += """
-위 검색 결과를 참고하여 individual_cases를 작성하세요.
-- applier: 블로그/유튜브 작성자 이름 또는 "개인 투자자"
-- period: 글에서 언급된 투자 기간
-- result: 수익률 또는 성과
-- feedback: 후기/느낀점
-- source_link: 반드시 위 URL 사용 [필수]
-"""
-        prompt += individual_context
 
     return prompt
 

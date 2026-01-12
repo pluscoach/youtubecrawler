@@ -142,14 +142,13 @@ export interface LifeExpansion {
   examples: LifeExpansionExample[];
 }
 
-// 보완 사례 타입
+// 보완 사례 타입 (source_link 제거됨 - Gemini가 대본 작성 시 출처 검증)
 export interface ImprovementCase {
   original_limitation?: string;
   improver?: string;
   method?: string;
   verified_result?: string;
   verification_period?: string;
-  source_link?: string;
 }
 
 // 차별화 포인트 타입
@@ -170,9 +169,6 @@ export interface AutomationInsight {
   differentiation_points?: DifferentiationPoint[];
   improvement_search_failed?: boolean;
   suggested_search_keywords?: string[];
-  // 강화된 필드
-  individual_cases?: IndividualCase[];
-  execution_guide?: ExecutionStep[];
 }
 
 export interface ContentDirectionStep {

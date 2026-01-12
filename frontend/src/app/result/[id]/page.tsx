@@ -213,38 +213,10 @@ function generateMarkdown(result: AnalysisResult): string {
       // 보완 사례
       if (ai.improvement_cases && ai.improvement_cases.length > 0) {
         md += `#### 실제 보완/업그레이드 사례\n`;
-        md += `| 원본 한계 | 보완한 사람 | 방법 | 검증 결과 | 검증 기간 | 출처 |\n`;
-        md += `|-----------|-------------|------|-----------|-----------|------|\n`;
+        md += `| 원본 한계 | 보완한 사람 | 방법 | 검증 결과 | 검증 기간 |\n`;
+        md += `|-----------|-------------|------|-----------|-----------|\n`;
         ai.improvement_cases.forEach((ic: any) => {
-          const sourceLink = ic.source_link && ic.source_link.startsWith('http')
-            ? `[링크](${ic.source_link})`
-            : (ic.source_link || '-');
-          md += `| ${ic.original_limitation || '-'} | ${ic.improver || '-'} | ${ic.method || '-'} | ${ic.verified_result || '-'} | ${ic.verification_period || '-'} | ${sourceLink} |\n`;
-        });
-        md += `\n`;
-      }
-
-      // 개인 투자자 적용 사례
-      if (ai.individual_cases && ai.individual_cases.length > 0) {
-        md += `#### 개인 투자자 적용 사례\n`;
-        md += `| 전략 | 적용자 | 기간 | 결과 | 느낀 점 | 출처 |\n`;
-        md += `|------|--------|------|------|---------|------|\n`;
-        ai.individual_cases.forEach((ic: any) => {
-          const sourceLink = ic.source_link && ic.source_link.startsWith('http')
-            ? `[링크](${ic.source_link})`
-            : (ic.source_link || '-');
-          md += `| ${ic.strategy || '-'} | ${ic.applier || '-'} | ${ic.period || '-'} | ${ic.result || '-'} | ${ic.feedback || '-'} | ${sourceLink} |\n`;
-        });
-        md += `\n`;
-      }
-
-      // 단계별 실행 가이드
-      if (ai.execution_guide && ai.execution_guide.length > 0) {
-        md += `#### 단계별 실행 가이드\n`;
-        md += `| 단계 | 할 일 | 소요 시간 | 난이도 | 필요 도구 |\n`;
-        md += `|------|-------|-----------|--------|----------|\n`;
-        ai.execution_guide.forEach((step: any) => {
-          md += `| ${step.step} | ${step.task || '-'} | ${step.duration || '-'} | ${step.difficulty || '-'} | ${step.tool || '-'} |\n`;
+          md += `| ${ic.original_limitation || '-'} | ${ic.improver || '-'} | ${ic.method || '-'} | ${ic.verified_result || '-'} | ${ic.verification_period || '-'} |\n`;
         });
         md += `\n`;
       }

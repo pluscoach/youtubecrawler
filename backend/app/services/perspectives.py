@@ -306,7 +306,7 @@ CRITICAL_ANALYSIS_PROMPT = """너는 투자 철학 비평가야. 감정적 비�
    - ✅ "조건 충족 시 자동 매수 신호 발생"
    - ✅ "재무 지표 기준 종목 필터링"
 
-[자동화 관점 인사이트 작성 규칙]
+[자동화 관점 인사이트 작성 규칙] ★★★ 모든 항목 필수 출력 ★★★
 
 1. video_type 판단 기준:
    - 매매 기법: 타이밍, 진입/청산 기준 → 지표 기반 자동화
@@ -314,66 +314,95 @@ CRITICAL_ANALYSIS_PROMPT = """너는 투자 철학 비평가야. 감정적 비�
    - 심리/멘탈: 감정 통제, 인내 → 강제 룰/차단 시스템
    - 리스크 관리: 자금 관리, 분산 → 포지션/비중 자동 조절
 
-2. problem_solution_table 작성 규칙 [필수]:
-   - problem: 현실적 모순(realistic_contradictions)에서 추출
-   - human_difficulty: 숨겨진 전제(hidden_premises)에서 추출
-   - automation_solution: 기술적으로 해결 가능한 방법
-   - implementation: 간단 요약
-   - implementation_detail [4가지 모두 필수]:
-     - condition: 구체적 수치 조건 (예: "PER < 15 AND ROE > 15% AND 부채비율 < 100%")
-     - tool: 실제 사용 가능한 도구 (예: "키움HTS 조건검색, 네이버금융 스크리너, Python FinanceDataReader")
-     - backtest_result: 백테스트 결과 (예: "2015-2024 KOSPI 적용 시 연 11%, MDD 22%")
-     - caution: 주의사항 (예: "금융주 제외, 거래량 100만주 이상 필터 필요")
-   - 구체적 예시:
-     | 좋은 기업 찾기 | 수백 개 분석 불가 | 정량 지표 스크리닝 | condition: PER<15 & ROE>15% & 부채비율<100% / tool: 키움HTS 조건검색 / backtest: 2015-2024 연 11% / caution: 금융주 제외 |
-     | 감정적 매매 | 손실회피편향 | 규칙 기반 자동 매도 | condition: -10% 손절, +30% 익절 / tool: 키움HTS 조건주문 / backtest: 2015-2024 승률 62% / caution: 급등주 부적합 |
+2. problem_solution_table [필수 - 최소 2개]:
+   - implementation_detail의 4가지 필드 모두 구체적 값 필수 (빈 값 금지)
 
-3. core_insight 형식:
-   "이 전략은 [전제]를 가정하는데, 사람이 직접 하기엔 [한계]가 있다.
-   → [자동화 방법]을 적용하면 실행 가능해진다."
+3. core_insight [필수]: 한 문장 요약
 
-4. life_expansion 작성 규칙:
-   - 투자 외 삶의 영역에도 동일 원리 적용 가능한지 분석
-   - 적용 가능 영역: 습관 관리, 지출 관리, 학습 루틴, 시간 관리 등
-   - 구체적 예시 제시
+4. life_expansion [필수]: 투자 외 삶의 영역 적용 예시
 
-5. improvement_cases (보완 사례) 작성 규칙 [필수 - 최소 2개]:
-   - 원본 영상의 한계를 실제로 보완/업그레이드한 사례를 찾아 작성
-   - verification_period 필드에 검증 기간 명시 필수
-   - source_link 필드에 출처 URL 필수 (책이면 교보문고/예스24 링크, 논문이면 Google Scholar 링크)
-   - 알려진 보완 사례와 출처:
-     | 원본 한계 | 보완한 사람 | 방법 | 검증 결과 | 검증 기간 | 출처 |
-     | 기업 분석 주관적 | 조엘 그린블라트 | 마법공식 ROC+EY | 연 24% | 1988-2009 | magicformulainvesting.com |
-     | 저평가주 발굴 | 벤저민 그레이엄 | NCAV 공식 | 시장+7%p | 1930-1956 | https://www.yes24.com/Product/Goods/145567 |
-     | 감정 통제 | 레이 달리오 | 올웨더 리밸런싱 | 연 9.5% | 1984-2013 | https://www.bridgewater.com/research-and-insights |
-     | 모멘텀 | 게리 안토나치 | 듀얼 모멘텀 | 연 17% | 1974-2013 | https://www.amazon.com/Dual-Momentum-Investing |
-   - 반드시 실제 URL을 source_link에 넣어야 함
+5. improvement_cases [★★★ 필수 - 정확히 2개 ★★★]:
+   ⚠️ 절대 생략 금지! 반드시 2개 작성!
+   ⚠️ source_link에 반드시 실제 URL 입력! "--" 또는 빈 값 금지!
 
-6. individual_cases (개인 투자자 적용 사례) 작성 규칙 [필수 - 최소 1개]:
-   - Tavily 검색 결과 또는 알려진 사례 활용
-   - 검색 결과 없으면 아래 형식으로 작성:
-     | 전략 | 적용자 | 기간 | 결과 | 느낀 점 | 출처 |
-     | 마법공식 | 국내 개인투자자 | 2-3년 | 시장대비 초과수익 | 감정 개입 줄고 규칙적 매매 가능 | 검색: "마법공식 투자 후기" |
-   - 검색 결과가 있으면 실제 블로그/유튜브 링크 사용
+   [사용할 수 있는 검증된 보완 사례 목록 - 이 중에서 선택]:
 
-7. execution_guide (단계별 실행 가이드) 작성 규칙 [필수 - 최소 4단계]:
-   - 각 자동화 해결책을 실행하기 위한 구체적 단계
-   - 난이도: 쉬움(30분 이내), 중간(1시간), 어려움(코딩 필요)
-   - 필수 예시:
-     | 단계 | 할 일 | 소요 시간 | 난이도 | 필요 도구 |
-     | 1 | 스크리닝 조건 정리 (엑셀/메모장에 기록) | 30분 | 쉬움 | 엑셀 or 메모장 |
-     | 2 | HTS 조건검색에 등록 | 20분 | 쉬움 | 키움/삼성 HTS |
-     | 3 | 조건 충족 시 알림 설정 | 10분 | 쉬움 | HTS 알림 기능 |
-     | 4 | 월별 리밸런싱 일정 등록 | 5분 | 쉬움 | 캘린더 앱 |
-     | 5 | (선택) 자동매매 API 연동 | 2시간 | 어려움 | Python + 증권사 API |
+   사례1: 조엘 그린블라트 마법공식
+   - original_limitation: "버핏의 기업 분석은 주관적이고 시간이 오래 걸림"
+   - improver: "조엘 그린블라트"
+   - method: "마법공식 - ROC(자본수익률) + EY(이익수익률) 2가지 지표로 정량화"
+   - verified_result: "연평균 24% 수익률"
+   - verification_period: "1988-2009 (21년)"
+   - source_link: "https://www.magicformulainvesting.com"
 
-8. differentiation_points (영상 차별화 포인트) 작성 규칙 [필수 - 정확히 3개]:
-   - 반드시 3개 작성 (정량화 성공 / 감정 배제 성공 / 개인 적용 가능성)
-   - type 유형별 quote_template:
-     1. "정량화 성공": "버핏은 [주관적 방법]을 말했지만, [그린블라트]가 이걸 [마법공식]으로 정량화했습니다. 실제로 [1988-2009년] 연 [24%]가 검증됐어요."
-     2. "감정 배제 성공": "[버핏]은 [공포에 매수]를 요구했지만, [달리오]가 [올웨더 포트폴리오]로 감정을 배제했습니다. 실제로 [30년간] [연 9.5%]를 달성했어요."
-     3. "개인 적용 가능성": "이 전략은 [키움HTS]만 있으면 [30분] 안에 누구나 시작할 수 있습니다. 전문가만 되는 게 아닙니다."
-   - 3번은 검색 결과 없어도 도구+시간으로 작성
+   사례2: 레이 달리오 올웨더 포트폴리오
+   - original_limitation: "시장 타이밍과 감정 통제가 필요함"
+   - improver: "레이 달리오"
+   - method: "올웨더 포트폴리오 - 자산배분 + 정기 리밸런싱으로 감정 배제"
+   - verified_result: "연평균 9.5% 수익률, MDD 12%"
+   - verification_period: "1984-2013 (30년)"
+   - source_link: "https://www.bridgewater.com/research-and-insights/the-all-weather-story"
+
+   사례3: 벤저민 그레이엄 NCAV
+   - original_limitation: "저평가 기업 발굴이 주관적"
+   - improver: "벤저민 그레이엄"
+   - method: "NCAV(순유동자산가치) 공식으로 저평가 종목 정량 필터링"
+   - verified_result: "시장 대비 +7%p 초과수익"
+   - verification_period: "1930-1956"
+   - source_link: "https://www.yes24.com/Product/Goods/657563"
+
+   사례4: 게리 안토나치 듀얼 모멘텀
+   - original_limitation: "모멘텀 전략의 타이밍 판단이 주관적"
+   - improver: "게리 안토나치"
+   - method: "듀얼 모멘텀 - 상대 모멘텀 + 절대 모멘텀 결합"
+   - verified_result: "연평균 17% 수익률"
+   - verification_period: "1974-2013"
+   - source_link: "https://www.amazon.com/Dual-Momentum-Investing-Gary-Antonacci/dp/0071849440"
+
+6. individual_cases [★★★ 필수 - 최소 1개 ★★★]:
+   ⚠️ 절대 생략 금지! 반드시 1개 이상 작성!
+
+   Tavily 검색 결과가 있으면 그 URL 사용, 없으면 아래 기본 사례 사용:
+   - strategy: "퀀트 가치투자 / 마법공식"
+   - applier: "국내 개인투자자들"
+   - period: "2-3년"
+   - result: "KOSPI 대비 초과수익 달성 사례 다수"
+   - feedback: "감정 개입이 줄고 규칙적 매매가 가능해짐"
+   - source_link: "https://www.google.com/search?q=마법공식+투자+후기+블로그"
+
+7. execution_guide [★★★ 필수 - 정확히 4개 이상 ★★★]:
+   ⚠️ 절대 생략 금지! 반드시 4단계 이상 작성!
+
+   기본 템플릿 (영상 내용에 맞게 수정):
+   [
+     {{"step": 1, "task": "투자 조건 정리 (PER, ROE 등 기준 명확화)", "duration": "30분", "difficulty": "쉬움", "tool": "엑셀 or 메모장"}},
+     {{"step": 2, "task": "HTS/스크리너에서 조건검색 설정", "duration": "20분", "difficulty": "쉬움", "tool": "키움HTS 또는 네이버금융"}},
+     {{"step": 3, "task": "조건 충족 종목 알림 설정", "duration": "10분", "difficulty": "쉬움", "tool": "HTS 알림 기능"}},
+     {{"step": 4, "task": "월별 리밸런싱 일정 캘린더 등록", "duration": "5분", "difficulty": "쉬움", "tool": "구글 캘린더"}},
+     {{"step": 5, "task": "(선택) Python 자동매매 연동", "duration": "2시간", "difficulty": "어려움", "tool": "Python + 증권사 API"}}
+   ]
+
+8. differentiation_points [★★★ 필수 - 정확히 3개 ★★★]:
+   ⚠️ 절대 생략 금지! 반드시 3개 모두 작성!
+
+   반드시 아래 3가지 type으로 작성:
+   [
+     {{
+       "type": "정량화 성공",
+       "summary": "[영상 거장]의 [주관적 방법]을 [누가] [어떤 공식]으로 정량화함",
+       "quote_template": "[거장]은 [주관적 방법]을 말했지만, [그린블라트]가 이걸 [마법공식]으로 정량화했습니다. 실제로 [1988-2009년] 연 [24%]가 검증됐어요."
+     }},
+     {{
+       "type": "감정 배제 성공",
+       "summary": "[감정적 요소]를 [시스템/규칙]으로 대체한 사례",
+       "quote_template": "[거장]은 [감정적 판단]을 요구했지만, [달리오]가 [올웨더 포트폴리오]로 감정을 배제했습니다. 실제로 [30년간] [연 9.5%]를 달성했어요."
+     }},
+     {{
+       "type": "개인 적용 가능성",
+       "summary": "일반인도 [도구]만 있으면 [시간] 안에 시작 가능",
+       "quote_template": "이 전략은 [키움HTS]만 있으면 [30분] 안에 누구나 시작할 수 있습니다. 전문가만 되는 게 아닙니다."
+     }}
+   ]
 """
 
 
